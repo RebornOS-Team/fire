@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RebornOS Fire
+Exec="/opt/rebornos-fire/fire" %U
+Terminal=false
+Type=Application
+Icon=fire
+StartupWMClass=RebornOS Fire
+Comment=RebornOS Fire
+Categories=Utility;

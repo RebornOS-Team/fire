@@ -1,0 +1,77 @@
+{
+  "private": true,
+  "name": "rebornos-fire",
+  "description": "RebornOS Fire",
+  "version": "1.0.0",
+  "author": {
+    "name": "SoulHarsh007",
+    "email": "harshtheking@hotmail.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "url": "https://gitlab.com/rebornos-team/applications/fire",
+    "type": "git"
+  },
+  "main": "app/background.js",
+  "homepage": "https://rebornos.org/",
+  "scripts": {
+    "dev": "nextron",
+    "build:dist": "yarn build && yarn build:package && yarn build:make",
+    "build:pack": "yarn build && yarn build:package",
+    "build": "nextron build --linux",
+    "build:package": "./builder.sh",
+    "build:make": "makepkg -Ciscf --config ./makepkg.conf",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "browserslist": [
+    "chrome 89"
+  ],
+  "dependencies": {
+    "electron-serve": "1.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.5",
+    "critters": "0.0.10",
+    "electron": "12.0.7",
+    "electron-builder": "22.11.3",
+    "eslint": "7.26.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-jsdoc": "34.0.2",
+    "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-react": "7.23.2",
+    "eslint-plugin-react-hooks": "4.2.0",
+    "next": "10.2.0",
+    "nextron": "6.0.6",
+    "prettier": "2.3.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rsuite": "4.10.0"
+  },
+  "build": {
+    "appId": "org.rebornos.fire",
+    "productName": "RebornOS Fire",
+    "copyright": "Copyright © 2021 SoulHarsh007",
+    "files": [
+      "./resources/icon.png",
+      "./app",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "resources"
+    },
+    "linux": {
+      "target": "dir",
+      "maintainer": "SoulHarsh007",
+      "vendor": "RebornOS",
+      "executableName": "fire",
+      "icon": "icon.png",
+      "category": "Utility",
+      "desktop": {
+        "Name": "RebornOS Fire",
+        "Type": "Application",
+        "Terminal": false
+      }
+    }
+  }
+}
