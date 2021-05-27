@@ -16,14 +16,14 @@ import {Context} from '../utils/store';
 import {RenderAppearance} from './RenderAppearance';
 
 /**
- * @function RenderInstallation
+ * @function RenderUnInstallation
  * @author SoulHarsh007 <harshtheking@hotmail.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Beta
- * @description Used for rendering Active Installation
+ * @description Used for rendering Active UnInstallation
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderInstallation() {
+export function RenderUnInstallation() {
   const [state, dispatch] = useContext(Context);
   const [commandOutput, setCommandOutput] = useState('');
   const AlwaysScrollToBottom = () => {
@@ -39,10 +39,10 @@ export function RenderInstallation() {
     return <div ref={elementRef} />;
   };
   useEffect(() => {
-    if (!state.installationActive) return;
+    if (!state.unInstallationActive) return;
     const commandWatch = new StopWatch();
     commandWatch.start();
-    const childProcess = spawn('pkexec', state.install.packageDeps);
+    const childProcess = spawn('pkexec', state.uninstall.packageDeps);
     setTimeout(() =>
       setCommandOutput(
         x =>
@@ -71,23 +71,23 @@ export function RenderInstallation() {
         450
       );
       dispatch({
-        type: 'InstallationUpdate',
+        type: 'UnInstallationUpdate',
         status: false,
-        deps: ['pacman', '-Sv', '--noconfirm', '--needed'],
-        name: state.install.packageName,
-        goto: <RenderInstallation />,
+        deps: ['pacman', '-Rv', '--noconfirm'],
+        name: state.uninstall.packageName,
+        goto: <RenderUnInstallation />,
       });
       new Notification(`Installation ${code === 0 ? 'Completed' : 'Failed'}!`, {
         icon: '/icon.png',
         body: `Installation ${code === 0 ? 'completed' : 'failed'} for: ${
-          state.install.packageName
+          state.uninstall.packageName
         }`,
       });
     });
   }, [
-    state.install.packageDeps,
-    state.installationActive,
-    state.install.packageName,
+    state.uninstall.packageDeps,
+    state.unInstallationActive,
+    state.uninstall.packageName,
     dispatch,
   ]);
   const [scroll, setScroll] = useState(true);

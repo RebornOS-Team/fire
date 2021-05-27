@@ -1,17 +1,7 @@
-import {
-  Icon,
-  Panel,
-  Grid,
-  Col,
-  Row,
-  Divider,
-  IconButton,
-  ButtonGroup,
-  Checkbox,
-} from 'rsuite';
-import {useState, useEffect, useRef} from 'react';
-import {spawn} from 'child_process';
-import {StopWatch} from '../utils/stopWatch';
+import {Panel, Grid, Row, Divider, Nav, Navbar, FlexboxGrid} from 'rsuite';
+import Icon from 'rsuite/lib/Icon/Icon';
+import {useState, useEffect} from 'react';
+import {release, cpus, hostname, userInfo, freemem, totalmem} from 'os';
 
 /**
  * @function RenderDashboard
@@ -22,59 +12,28 @@ import {StopWatch} from '../utils/stopWatch';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderDashboard() {
-  const [forceInstall] = useState(false);
-  const [command, setCommand] = useState([]);
-  const [commandOutput, setCommandOutput] = useState('');
-  const AlwaysScrollToBottom = () => {
-    const elementRef = useRef();
-    useEffect(
-      () =>
-        elementRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end',
-        }),
-      []
-    );
-    return <div ref={elementRef} />;
-  };
+  const [sysInfo, setSysInfo] = useState({
+    Host_Name: 'fetching info...',
+    CPU_Model: 'fetching info...',
+    User_Name: 'fetching info...',
+    User_Shell: 'fetching info...',
+    Memory_Available: 'fetching info...',
+    Kernel_Release: 'fetching info...',
+  });
   useEffect(() => {
-    setCommand(['ping', '-c2', '127.0.0.1']);
+    const user = userInfo();
+    setSysInfo({
+      Host_Name: hostname(),
+      CPU_Model: cpus()[0].model,
+      User_Name: `${user.username} (${user.uid})`,
+      User_Shell: user.shell,
+      Memory_Available: `${(freemem() / (1024 * 1024)).toFixed(2)} MiB / ${(
+        totalmem() /
+        (1024 * 1024)
+      ).toFixed(2)} MiB`,
+      Kernel_Release: release(),
+    });
   }, []);
-  useEffect(() => {
-    if (!command.length) return;
-    const commandWatch = new StopWatch();
-    commandWatch.start();
-    const childProcess = spawn('pkexec', command);
-    setTimeout(() =>
-      setCommandOutput(
-        x =>
-          `${x}Child process spawned: PID: ${
-            childProcess.pid
-          } Command: ${childProcess.spawnargs.join(' ')}\n`
-      )
-    );
-    childProcess.stdout.on('data', data => {
-      console.log(data.toString());
-      setTimeout(() => setCommandOutput(x => `${x}${data.toString()}`), 450);
-    });
-    childProcess.stderr.on('data', data => {
-      console.log(data.toString());
-      setTimeout(() => setCommandOutput(x => `${x}${data.toString()}`), 450);
-    });
-    childProcess.once('close', (code, signal) => {
-      commandWatch.stop();
-      const out = signal ? `(${signal})` : '';
-      setTimeout(
-        () =>
-          setCommandOutput(
-            x =>
-              `${x}Child process exited with code: ${code} ${out}\nCommand execution took: ${commandWatch.toString()}`
-          ),
-        450
-      );
-    });
-  }, [forceInstall, command]);
-  const [scroll, setScroll] = useState(true);
   return (
     <Grid
       fluid
@@ -85,41 +44,50 @@ export function RenderDashboard() {
       <Row>
         <Panel header={<h3>Welcome to RebornOS Fire!</h3>} bodyFill></Panel>
       </Row>
+      <Navbar>
+        <Navbar.Body>
+          <Nav pullRight appearance="subtle" activeKey="1">
+            <Nav.Item
+              icon={<Icon icon="refresh" pulse={false} />}
+              eventKey="1"
+              onSelect={() => {}}
+            >
+              Reload
+            </Nav.Item>
+          </Nav>
+        </Navbar.Body>
+      </Navbar>
       <Divider />
-      <Row>
-        <Col>
-          <div
+      <Row
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        <h4>System Information:</h4>
+      </Row>
+      <Divider />
+      <Row
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        {Object.keys(sysInfo).map((x, i) => (
+          <FlexboxGrid
+            key={i}
+            justify="space-between"
             style={{
-              maxHeight: 100,
-              background: '#000',
-              overflow: 'scroll',
-              whiteSpace: 'pre-wrap',
-              textAlign: 'left',
-              fontFamily: 'monospace',
+              paddingLeft: '10px',
+              paddingRight: '30px',
             }}
           >
-            {commandOutput}
-            {scroll ? <AlwaysScrollToBottom /> : undefined}
-          </div>
-          <Checkbox
-            checked={scroll}
-            onChange={() => setScroll(x => !x)}
-            style={{
-              textAlign: 'left',
-            }}
-          >
-            Scroll with output
-          </Checkbox>
-          <ButtonGroup justified>
-            <IconButton icon={<Icon icon="file-text" />} appearance="ghost">
-              Generate Log File
-            </IconButton>
-            <IconButton icon={<Icon icon="link" />} appearance="ghost">
-              PasteBinIt!
-            </IconButton>
-          </ButtonGroup>
-        </Col>
-        <hr />
+            <FlexboxGrid.Item>
+              <h4>{x.split('_').join(' ')}:</h4>
+            </FlexboxGrid.Item>
+            <FlexboxGrid.Item>
+              <h4>{sysInfo[x]}</h4>
+            </FlexboxGrid.Item>
+          </FlexboxGrid>
+        ))}
       </Row>
     </Grid>
   );

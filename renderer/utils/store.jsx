@@ -3,12 +3,17 @@ import {RenderDashboard} from '../components/RenderDashboard';
 
 const initialState = {
   installationActive: false,
+  unInstallationActive: false,
   showAboutModal: false,
   scanPackages: true,
   content: <RenderDashboard />,
   install: {
     packageName: '',
     packageDeps: ['pacman', '-Sv', '--noconfirm', '--needed'],
+  },
+  uninstall: {
+    packageName: '',
+    packageDeps: ['pacman', '-Rv', '--noconfirm'],
   },
 };
 export const reducer = (state, action) => {
@@ -31,7 +36,15 @@ export const reducer = (state, action) => {
     case 'InstallationUpdate':
       return {
         ...state,
-        installationActive: !state.installationActive,
+        installationActive: action.status,
+        install: {
+          packageName: action.name,
+          packageDeps: [
+            ...['pacman', '-Sv', '--noconfirm', '--needed'],
+            ...action.deps,
+          ],
+        },
+        content: action.goto,
       };
     default:
       return state;

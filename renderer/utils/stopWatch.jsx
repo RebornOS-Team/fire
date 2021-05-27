@@ -81,13 +81,11 @@ export class StopWatch {
    * @returns {string} - returns time elapsed in string format
    */
   toString() {
-    const time = this.duration;
-    if (time >= 1000) {
-      return `${(time / 1000).toFixed(3)}s`;
+    if (this.duration >= 1000) {
+      return `${(this.duration / 1000).toFixed(3)}s`;
+    } else if (this.duration >= 1) {
+      return `${this.duration.toFixed(3)}ms`;
     }
-    if (time >= 1) {
-      return `${time.toFixed(3)}ms`;
-    }
-    return `${(time * 1000).toFixed(3)}μs`;
+    return `${(this.duration * 1000).toFixed(3)}μs`;
   }
 }
