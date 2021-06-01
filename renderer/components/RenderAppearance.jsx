@@ -16,6 +16,7 @@ import {useState, useContext} from 'react';
 import {execSync} from 'child_process';
 import {Context} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
+import {RenderUnInstallation} from './RenderUnInstallation';
 
 /**
  * @function RenderAppearance
@@ -30,6 +31,8 @@ export function RenderAppearance() {
   const [_, dispatch] = useContext(Context);
   const [scanPackages, setScanPackages] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showLastConfirmation, setShowLastConfirmation] = useState(false);
+  const [acceptedLastConfirm, setAcceptedLastConfirm] = useState(false);
   const [pkg, setPkg] = useState('');
   const [img, setImg] = useState({
     show: false,
@@ -156,6 +159,7 @@ export function RenderAppearance() {
             image: y.image,
             installed: true,
             package: y.package,
+            deps: y.deps,
           };
         }
         return y;
@@ -248,13 +252,12 @@ export function RenderAppearance() {
                         <ButtonGroup justified>
                           <Button
                             appearance="ghost"
-                            disabled={x.installed}
                             onClick={() => {
                               setPkg(x);
                               setShowConfirmation(true);
                             }}
                           >
-                            {x.installed ? 'Installed' : 'Install'}
+                            {x.installed ? 'Un-Install' : 'Install'}
                           </Button>
                           <Button appearance="ghost">Theming</Button>
                         </ButtonGroup>
@@ -288,23 +291,47 @@ export function RenderAppearance() {
         }}
       >
         <Modal.Header closeButton={false}>Are you sure?</Modal.Header>
-        <Modal.Body>You are about to install: {pkg.name}</Modal.Body>
+        <Modal.Body>
+          You are about to {pkg.installed ? 'un-install' : 'install'}:{' '}
+          {pkg.name}
+        </Modal.Body>
         <Modal.Footer>
           <ButtonGroup justified>
             <Button
               onClick={() => {
                 setShowConfirmation(false);
-                dispatch({
-                  type: 'InstallationUpdate',
-                  status: true,
-                  name: pkg.name,
-                  deps: pkg.deps,
-                  goto: <RenderInstallation />,
-                });
-                new Notification('Installation Started!', {
-                  icon: `/icon.png`,
-                  body: `Installation started for: ${pkg.name}`,
-                });
+                if (!pkg.installed) {
+                  dispatch({
+                    type: 'InstallationUpdate',
+                    status: true,
+                    name: pkg.name,
+                    deps: pkg.deps,
+                    goto: <RenderInstallation />,
+                  });
+                  new Notification('Installation Started!', {
+                    icon: `/icon.png`,
+                    body: `Installation started for: ${pkg.name}`,
+                  });
+                } else {
+                  if (
+                    packages.filter(x => x.installed).length === 1 &&
+                    !acceptedLastConfirm
+                  ) {
+                    return setShowLastConfirmation(true);
+                  } else {
+                    dispatch({
+                      type: 'UnInstallationUpdate',
+                      status: true,
+                      name: pkg.name,
+                      deps: pkg.deps,
+                      goto: <RenderUnInstallation />,
+                    });
+                    new Notification('Un-Installation Started!', {
+                      icon: `/icon.png`,
+                      body: `Un-Installation started for: ${pkg.name}`,
+                    });
+                  }
+                }
               }}
               appearance="primary"
             >
@@ -312,6 +339,54 @@ export function RenderAppearance() {
             </Button>
             <Button
               onClick={() => setShowConfirmation(false)}
+              appearance="subtle"
+            >
+              Cancel
+            </Button>
+          </ButtonGroup>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        size="xs"
+        show={showLastConfirmation}
+        onHide={() => setShowLastConfirmation(false)}
+        backdrop="static"
+        keyboard={false}
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        <Modal.Header closeButton={false}>
+          <Icon icon="warning" /> Warning: Last DE detected
+        </Modal.Header>
+        <Modal.Body>
+          Warning: If you un-install {pkg.name}, you will be left with no
+          desktop environment! Are you sure you want to do this?
+        </Modal.Body>
+        <Modal.Footer>
+          <ButtonGroup justified>
+            <Button
+              onClick={() => {
+                setShowLastConfirmation(false);
+                setAcceptedLastConfirm(true);
+                dispatch({
+                  type: 'UnInstallationUpdate',
+                  status: true,
+                  name: pkg.name,
+                  deps: pkg.deps,
+                  goto: <RenderUnInstallation />,
+                });
+                new Notification('Un-Installation Started!', {
+                  icon: `/icon.png`,
+                  body: `Un-Installation started for: ${pkg.name}`,
+                });
+              }}
+              appearance="primary"
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={() => setShowLastConfirmation(false)}
               appearance="subtle"
             >
               Cancel

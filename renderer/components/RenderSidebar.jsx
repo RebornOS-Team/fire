@@ -107,41 +107,31 @@ export function RenderSidebar() {
             <Nav>
               <Nav.Item
                 eventKey="1"
-                disabled={
-                  state.installationActive || state.unInstallationActive
-                }
+                disabled={state.install.status || state.uninstall.status}
               >
                 Dashboard
               </Nav.Item>
               <Nav.Item
                 eventKey="2"
-                disabled={
-                  state.installationActive || state.unInstallationActive
-                }
+                disabled={state.install.status || state.uninstall.status}
               >
                 Desktops
               </Nav.Item>
               <Nav.Item
                 eventKey="3"
-                disabled={
-                  state.installationActive || state.unInstallationActive
-                }
+                disabled={state.install.status || state.uninstall.status}
               >
                 Display Managers
               </Nav.Item>
               <Nav.Item
                 eventKey="4"
-                disabled={
-                  state.installationActive || state.unInstallationActive
-                }
+                disabled={state.install.status || state.uninstall.status}
               >
                 Utilities
               </Nav.Item>
               <Nav.Item
                 eventKey="5"
-                disabled={
-                  state.installationActive || state.unInstallationActive
-                }
+                disabled={state.install.status || state.uninstall.status}
               >
                 System Maintenance
               </Nav.Item>

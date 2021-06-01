@@ -2,18 +2,23 @@ import {createContext, useReducer} from 'react';
 import {RenderDashboard} from '../components/RenderDashboard';
 
 const initialState = {
-  installationActive: false,
-  unInstallationActive: false,
   showAboutModal: false,
   scanPackages: true,
   content: <RenderDashboard />,
   install: {
+    status: false,
     packageName: '',
     packageDeps: ['pacman', '-Sv', '--noconfirm', '--needed'],
   },
   uninstall: {
+    status: false,
     packageName: '',
     packageDeps: ['pacman', '-Rv', '--noconfirm'],
+  },
+  enable: {
+    status: false,
+    packageName: '',
+    packageDeps: ['systemctl', 'enable'],
   },
 };
 export const reducer = (state, action) => {
@@ -36,13 +41,33 @@ export const reducer = (state, action) => {
     case 'InstallationUpdate':
       return {
         ...state,
-        installationActive: action.status,
         install: {
+          status: action.status,
           packageName: action.name,
           packageDeps: [
             ...['pacman', '-Sv', '--noconfirm', '--needed'],
             ...action.deps,
           ],
+        },
+        content: action.goto,
+      };
+    case 'UnInstallationUpdate':
+      return {
+        ...state,
+        uninstall: {
+          status: action.status,
+          packageName: action.name,
+          packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
+        },
+        content: action.goto,
+      };
+    case 'EnableUpdate':
+      return {
+        ...state,
+        enable: {
+          status: action.enable,
+          packageName: action.name,
+          packageDeps: [...['systemctl', 'enable'], ...action.deps],
         },
         content: action.goto,
       };

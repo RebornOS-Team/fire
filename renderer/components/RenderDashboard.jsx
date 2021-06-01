@@ -2,6 +2,7 @@ import {Panel, Grid, Row, Divider, Nav, Navbar, FlexboxGrid} from 'rsuite';
 import Icon from 'rsuite/lib/Icon/Icon';
 import {useState, useEffect} from 'react';
 import {release, cpus, hostname, userInfo, freemem, totalmem} from 'os';
+import {readlinkSync, existsSync} from 'fs';
 
 /**
  * @function RenderDashboard
@@ -19,21 +20,34 @@ export function RenderDashboard() {
     User_Shell: 'fetching info...',
     Memory_Available: 'fetching info...',
     Kernel_Release: 'fetching info...',
+    Display_Manager: 'fetching info...',
   });
+  const [reload, setReload] = useState(true);
   useEffect(() => {
-    const user = userInfo();
-    setSysInfo({
-      Host_Name: hostname(),
-      CPU_Model: cpus()[0].model,
-      User_Name: `${user.username} (${user.uid})`,
-      User_Shell: user.shell,
-      Memory_Available: `${(freemem() / (1024 * 1024)).toFixed(2)} MiB / ${(
-        totalmem() /
-        (1024 * 1024)
-      ).toFixed(2)} MiB`,
-      Kernel_Release: release(),
-    });
-  }, []);
+    if (reload) {
+      const user = userInfo();
+      setSysInfo({
+        Host_Name: hostname(),
+        CPU_Model: cpus()[0].model,
+        User_Name: `${user.username} (${user.uid})`,
+        User_Shell: user.shell,
+        Memory_Available: `${(freemem() / (1024 * 1024)).toFixed(2)} MiB / ${(
+          totalmem() /
+          (1024 * 1024)
+        ).toFixed(2)} MiB`,
+        Kernel_Release: release(),
+        Display_Manager: existsSync(
+          '/etc/systemd/system/display-manager.service'
+        )
+          ? readlinkSync('/etc/systemd/system/display-manager.service')
+              ?.match(/[a-z]*\.service/g)?.[0]
+              ?.split('.')?.[0]
+              ?.toUpperCase()
+          : 'TTY',
+      });
+      setReload(false);
+    }
+  }, [reload]);
   return (
     <Grid
       fluid
@@ -50,7 +64,18 @@ export function RenderDashboard() {
             <Nav.Item
               icon={<Icon icon="refresh" pulse={false} />}
               eventKey="1"
-              onSelect={() => {}}
+              onSelect={() => {
+                setSysInfo({
+                  Host_Name: 'fetching info...',
+                  CPU_Model: 'fetching info...',
+                  User_Name: 'fetching info...',
+                  User_Shell: 'fetching info...',
+                  Memory_Available: 'fetching info...',
+                  Kernel_Release: 'fetching info...',
+                  Display_Manager: 'fetching info...',
+                });
+                setReload(true);
+              }}
             >
               Reload
             </Nav.Item>

@@ -39,7 +39,7 @@ export function RenderInstallation() {
     return <div ref={elementRef} />;
   };
   useEffect(() => {
-    if (!state.installationActive) return;
+    if (!state.install.status) return;
     const commandWatch = new StopWatch();
     commandWatch.start();
     const childProcess = spawn('pkexec', state.install.packageDeps);
@@ -73,7 +73,7 @@ export function RenderInstallation() {
       dispatch({
         type: 'InstallationUpdate',
         status: false,
-        deps: ['pacman', '-Sv', '--noconfirm', '--needed'],
+        deps: [],
         name: state.install.packageName,
         goto: <RenderInstallation />,
       });
@@ -86,7 +86,7 @@ export function RenderInstallation() {
     });
   }, [
     state.install.packageDeps,
-    state.installationActive,
+    state.install.status,
     state.install.packageName,
     dispatch,
   ]);
@@ -142,7 +142,7 @@ export function RenderInstallation() {
             <IconButton
               icon={<Icon icon="back-arrow" />}
               appearance="ghost"
-              disabled={state.installationActive}
+              disabled={state.install.status}
               onClick={() =>
                 dispatch({
                   type: 'ContentUpdate',

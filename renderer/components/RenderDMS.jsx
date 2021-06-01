@@ -16,6 +16,7 @@ import {useState, useContext} from 'react';
 import {execSync} from 'child_process';
 import {Context} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
+import {readlinkSync, existsSync} from 'fs';
 
 /**
  * @function RenderDMS
@@ -47,7 +48,8 @@ export function RenderDMS() {
       image: '/openbox.webp',
       installed: false,
       package: /(lightdm)(-(devel|git))?/g,
-      deps: ['rebornos-cosmic-openbox'],
+      deps: ['lightdm'],
+      enabled: false,
     },
     {
       name: 'SDDM',
@@ -55,7 +57,8 @@ export function RenderDMS() {
       image: '/sddm.webp',
       installed: false,
       package: /(sddm)(-wayland)?(-git)?/g,
-      deps: ['rebornos-cosmic-i3'],
+      deps: ['sddm'],
+      enabled: false,
     },
     {
       name: 'GDM',
@@ -63,19 +66,17 @@ export function RenderDMS() {
       image: '/gdm.webp',
       installed: false,
       package: /(gdm)(-git)?/g,
-      deps: ['rebornos-cosmic-budgie'],
-    },
-    {
-      name: 'LXDM',
-      description: 'Lightweight X11 Display Manager',
-      image: '/cinnamon.webp',
-      installed: false,
-      package: /(lxdm)(-(git|gtk3))?/g,
-      deps: ['rebornos-cosmic-cinnamon'],
+      deps: ['gdm'],
+      enabled: false,
     },
   ]);
   if (scanPackages) {
     const scanned = execSync('pacman -Qq').toString();
+    const enabled = existsSync('/etc/systemd/system/display-manager.service')
+      ? readlinkSync('/etc/systemd/system/display-manager.service')?.match(
+          /(gd|sd|light)dm/g
+        )?.[0]
+      : 'TTY';
     setScanPackages(x => !x);
     setPackages(x => {
       if (!scanned.length) {
@@ -89,6 +90,8 @@ export function RenderDMS() {
             image: y.image,
             installed: true,
             package: y.package,
+            deps: y.deps,
+            enabled: enabled === y.deps[0],
           };
         }
         return y;
@@ -106,7 +109,7 @@ export function RenderDMS() {
           textAlign: 'center',
         }}
       >
-        <Panel header={<h3>Appearance</h3>} bodyFill></Panel>
+        <Panel header={<h3>Display Managers</h3>} bodyFill></Panel>
       </Row>
       <Navbar>
         <Navbar.Body>
@@ -189,7 +192,16 @@ export function RenderDMS() {
                           >
                             {x.installed ? 'Installed' : 'Install'}
                           </Button>
-                          <Button appearance="ghost">Theming</Button>
+                          <Button
+                            appearance="ghost"
+                            disabled={!x.installed}
+                            onClick={() => {
+                              setPkg(x);
+                              setShowConfirmation(true);
+                            }}
+                          >
+                            {x.installed ? 'Enabled' : 'Enable'}
+                          </Button>
                         </ButtonGroup>
                       </>
                     }

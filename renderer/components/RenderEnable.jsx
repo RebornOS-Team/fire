@@ -16,14 +16,14 @@ import {Context} from '../utils/store';
 import {RenderAppearance} from './RenderAppearance';
 
 /**
- * @function RenderUnInstallation
+ * @function RenderEnable
  * @author SoulHarsh007 <harshtheking@hotmail.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Beta
- * @description Used for rendering Active UnInstallation
+ * @description Used for rendering Active Installation
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderUnInstallation() {
+export function RenderEnable() {
   const [state, dispatch] = useContext(Context);
   const [commandOutput, setCommandOutput] = useState('');
   const AlwaysScrollToBottom = () => {
@@ -39,11 +39,10 @@ export function RenderUnInstallation() {
     return <div ref={elementRef} />;
   };
   useEffect(() => {
-    if (!state.uninstall.status) return;
+    if (!state.enable.status) return;
     const commandWatch = new StopWatch();
     commandWatch.start();
-    console.log(state.uninstall.packageDeps);
-    const childProcess = spawn('pkexec', state.uninstall.packageDeps);
+    const childProcess = spawn('pkexec', state.enable.packageDeps);
     setTimeout(() =>
       setCommandOutput(
         x =>
@@ -72,26 +71,23 @@ export function RenderUnInstallation() {
         450
       );
       dispatch({
-        type: 'UnInstallationUpdate',
+        type: 'EnableUpdate',
         status: false,
         deps: [],
-        name: state.uninstall.packageName,
-        goto: <RenderUnInstallation />,
+        name: state.enable.packageName,
+        goto: <RenderEnable />,
       });
-      new Notification(
-        `Un-Installation ${code === 0 ? 'Completed' : 'Failed'}!`,
-        {
-          icon: '/icon.png',
-          body: `Un-Installation ${code === 0 ? 'completed' : 'failed'} for: ${
-            state.uninstall.packageName
-          }`,
-        }
-      );
+      new Notification(`Enabling ${code === 0 ? 'Completed' : 'Failed'}!`, {
+        icon: '/icon.png',
+        body: `Enabling ${code === 0 ? 'completed' : 'failed'} for: ${
+          state.enable.packageName
+        }`,
+      });
     });
   }, [
-    state.uninstall.packageDeps,
-    state.uninstall.status,
-    state.uninstall.packageName,
+    state.enable.packageDeps,
+    state.enable.packageName,
+    state.enable.status,
     dispatch,
   ]);
   const [scroll, setScroll] = useState(true);
@@ -104,7 +100,7 @@ export function RenderUnInstallation() {
     >
       <Row>
         <Panel
-          header={<h3>You are un-installing: {state.uninstall.packageName}</h3>}
+          header={<h3>You are installing: {state.install.packageName}</h3>}
           bodyFill
         />
       </Row>
@@ -146,7 +142,7 @@ export function RenderUnInstallation() {
             <IconButton
               icon={<Icon icon="back-arrow" />}
               appearance="ghost"
-              disabled={state.uninstall.status}
+              disabled={state.install.status}
               onClick={() =>
                 dispatch({
                   type: 'ContentUpdate',
