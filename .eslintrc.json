@@ -6,7 +6,8 @@
   },
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
+    "next",
+    "next/core-web-vitals",
     "plugin:react-hooks/recommended",
     "google",
     "plugin:prettier/recommended",
@@ -31,6 +32,8 @@
   "rules": {
     "prettier/prettier": "warn",
     "valid-jsdoc": "off",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "@next/next/no-html-link-for-pages": ["error", "renderer/pages"],
+    "@next/next/no-img-element": "off"
   }
 }

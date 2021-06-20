@@ -1,7 +1,13 @@
+import {ipcRenderer} from 'electron';
+import {useContext, useEffect} from 'react';
 import {Container, Content} from 'rsuite';
-import {RenderAbout, RenderNavbar, RenderSidebar} from '../components';
+import {
+  RenderAbout,
+  RenderNavbar,
+  RenderSidebar,
+  NetworkDetection,
+} from '../components';
 import {Context} from '../utils/store';
-import {useContext} from 'react';
 
 /**
  * @function Index
@@ -12,9 +18,13 @@ import {useContext} from 'react';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export default function Index() {
-  const [state] = useContext(Context);
+  const {state} = useContext(Context);
+  useEffect(() => {
+    ipcRenderer.invoke('StateChange', state.activeTasks);
+  }, [state.activeTasks]);
   return (
     <Container>
+      <NetworkDetection />
       <Container>
         <RenderSidebar />
         <Container>

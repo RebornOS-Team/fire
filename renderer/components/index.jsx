@@ -7,3 +7,4 @@ export {RenderSM} from './RenderSM';
 export {RenderSidebar} from './RenderSidebar';
 export {RenderUtilities} from './RenderUtilities';
 export {RenderUnInstallation} from './RenderUnInstallation';
+export {NetworkDetection} from './NetworkDetection';

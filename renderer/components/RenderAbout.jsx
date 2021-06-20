@@ -12,7 +12,7 @@ import {useContext} from 'react';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderAbout() {
-  const [state, dispatch] = useContext(Context);
+  const {state, dispatch} = useContext(Context);
   return (
     <FlexboxGrid align="middle" justify="center">
       <Modal
@@ -34,6 +34,7 @@ export function RenderAbout() {
             src="/rebornos-fire-new.svg"
             height={128}
             width={128}
+            alt=""
           />
           <hr />
           <h6>RebornOS Fire</h6>

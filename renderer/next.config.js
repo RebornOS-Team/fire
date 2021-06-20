@@ -7,14 +7,13 @@ module.exports = {
       target: 'electron-renderer',
     }),
   experimental: {
-    cpus: 4,
+    cpus: 2,
     optimizeImages: true,
     optimizeCss: true,
-    turboMode: true,
     eslint: true,
-    enableBlurryPlaceholder: true,
   },
   devIndicators: {
     autoPrerender: true,
   },
+  webpack5: false,
 };

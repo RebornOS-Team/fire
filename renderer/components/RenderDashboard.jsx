@@ -28,7 +28,7 @@ export function RenderDashboard() {
       const user = userInfo();
       setSysInfo({
         Host_Name: hostname(),
-        CPU_Model: cpus()[0].model,
+        CPU_Model: `${cpus()[0].model} (${process.arch})`,
         User_Name: `${user.username} (${user.uid})`,
         User_Shell: user.shell,
         Memory_Available: `${(freemem() / (1024 * 1024)).toFixed(2)} MiB / ${(

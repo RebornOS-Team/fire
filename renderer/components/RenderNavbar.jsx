@@ -11,8 +11,7 @@ import {useContext} from 'react';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderNavbar() {
-  // eslint-disable-next-line no-unused-vars
-  const [state, dispatch] = useContext(Context);
+  const {dispatch} = useContext(Context);
   return (
     <Header>
       <Navbar>

@@ -13,3 +13,4 @@ linux-unpacked*
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+.scannerwork

@@ -15,6 +15,7 @@
   "main": "app/background.js",
   "homepage": "https://rebornos.org/",
   "scripts": {
+    "prepare": "yarn run next telemetry disable",
     "dev": "nextron",
     "build:dist": "yarn build:pack && yarn build:make",
     "build:pack": "yarn build && yarn build:package",
@@ -24,30 +25,30 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "browserslist": [
-    "chrome 89"
+    "chrome 91"
   ],
   "dependencies": {
     "electron-serve": "1.1.0"
   },
   "devDependencies": {
-    "@types/react": "17.0.8",
+    "@types/react": "17.0.11",
     "critters": "0.0.10",
-    "electron": "13.0.1",
-    "electron-builder": "22.10.5",
-    "eslint": "7.27.0",
+    "electron": "13.1.2",
+    "electron-builder": "22.11.7",
+    "eslint": "7.29.0",
     "eslint-config-google": "0.14.0",
-    "eslint-config-next": "10.2.3",
+    "eslint-config-next": "11.0.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-jsdoc": "35.1.2",
+    "eslint-plugin-jsdoc": "35.3.2",
     "eslint-plugin-prettier": "3.4.0",
     "eslint-plugin-react": "7.24.0",
     "eslint-plugin-react-hooks": "4.2.0",
-    "next": "10.2.3",
+    "next": "11.0.0",
     "nextron": "6.0.6",
-    "prettier": "2.3.0",
+    "prettier": "2.3.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "rsuite": "4.10.1"
+    "rsuite": "4.10.2"
   },
   "build": {
     "appId": "org.rebornos.fire",

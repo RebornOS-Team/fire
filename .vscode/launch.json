@@ -19,7 +19,7 @@
       "type": "chrome",
       "request": "attach",
       "port": 5858,
-      "timeout": 10000,
+      "timeout": 20000,
       "urlFilter": "http://localhost:*",
       "webRoot": "${workspaceFolder}/app",
       "sourceMapPathOverrides": {

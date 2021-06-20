@@ -18,7 +18,7 @@ import {Context} from '../utils/store';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderSidebar() {
-  const [state, dispatch] = useContext(Context);
+  const {state, dispatch} = useContext(Context);
   const [activeKey, setActiveKey] = useState('1');
   return (
     <div
@@ -90,6 +90,7 @@ export function RenderSidebar() {
                   src="/rebornos-fire-new.svg"
                   height={44}
                   width={44}
+                  alt=""
                 />
               </i>
               <span
@@ -105,33 +106,30 @@ export function RenderSidebar() {
           <hr />
           <Sidenav.Body>
             <Nav>
-              <Nav.Item
-                eventKey="1"
-                disabled={state.install.status || state.uninstall.status}
-              >
+              <Nav.Item eventKey="1" disabled={state.activeTasks}>
                 Dashboard
               </Nav.Item>
-              <Nav.Item
-                eventKey="2"
-                disabled={state.install.status || state.uninstall.status}
-              >
+              <Nav.Item eventKey="2" disabled={state.activeTasks}>
                 Desktops
               </Nav.Item>
-              <Nav.Item
-                eventKey="3"
-                disabled={state.install.status || state.uninstall.status}
-              >
+              <Nav.Item eventKey="3" disabled={state.activeTasks}>
                 Display Managers
               </Nav.Item>
               <Nav.Item
                 eventKey="4"
-                disabled={state.install.status || state.uninstall.status}
+                disabled={state.activeTasks}
+                style={{
+                  display: 'none',
+                }}
               >
                 Utilities
               </Nav.Item>
               <Nav.Item
                 eventKey="5"
-                disabled={state.install.status || state.uninstall.status}
+                disabled={state.activeTasks}
+                style={{
+                  display: 'none',
+                }}
               >
                 System Maintenance
               </Nav.Item>

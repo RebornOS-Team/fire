@@ -13,7 +13,6 @@ import {useState, useEffect, useRef, useContext} from 'react';
 import {spawn} from 'child_process';
 import {StopWatch} from '../utils/stopWatch';
 import {Context} from '../utils/store';
-import {RenderAppearance} from './RenderAppearance';
 
 /**
  * @function RenderEnable
@@ -24,8 +23,9 @@ import {RenderAppearance} from './RenderAppearance';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderEnable() {
-  const [state, dispatch] = useContext(Context);
+  const {state, dispatch} = useContext(Context);
   const [commandOutput, setCommandOutput] = useState('');
+  const [pid, setPid] = useState();
   const AlwaysScrollToBottom = () => {
     const elementRef = useRef();
     useEffect(
@@ -39,10 +39,14 @@ export function RenderEnable() {
     return <div ref={elementRef} />;
   };
   useEffect(() => {
-    if (!state.enable.status) return;
+    if (!state.activeTasks) return;
     const commandWatch = new StopWatch();
     commandWatch.start();
-    const childProcess = spawn('pkexec', state.enable.packageDeps);
+    const childProcess = spawn('pkexec', state.enable.packageDeps, {
+      shell: true,
+      detached: true,
+    });
+    setPid(childProcess.pid);
     setTimeout(() =>
       setCommandOutput(
         x =>
@@ -76,6 +80,7 @@ export function RenderEnable() {
         deps: [],
         name: state.enable.packageName,
         goto: <RenderEnable />,
+        origin: state.enable.origin,
       });
       new Notification(`Enabling ${code === 0 ? 'Completed' : 'Failed'}!`, {
         icon: '/icon.png',
@@ -87,7 +92,8 @@ export function RenderEnable() {
   }, [
     state.enable.packageDeps,
     state.enable.packageName,
-    state.enable.status,
+    state.enable.origin,
+    state.activeTasks,
     dispatch,
   ]);
   const [scroll, setScroll] = useState(true);
@@ -130,23 +136,40 @@ export function RenderEnable() {
             Scroll with output
           </Checkbox>
           <ButtonGroup justified>
-            <IconButton icon={<Icon icon="file-text" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="file-text" />}
+              appearance="ghost"
+              style={{
+                display: 'none',
+              }}
+            >
               Generate Log File
             </IconButton>
-            <IconButton icon={<Icon icon="stop" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="stop" />}
+              appearance="ghost"
+              onClick={() => process.kill(pid)}
+              disabled={!state.activeTasks}
+            >
               Abort
             </IconButton>
-            <IconButton icon={<Icon icon="link" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="link" />}
+              appearance="ghost"
+              style={{
+                display: 'none',
+              }}
+            >
               PasteBinIt!
             </IconButton>
             <IconButton
               icon={<Icon icon="back-arrow" />}
               appearance="ghost"
-              disabled={state.install.status}
+              disabled={state.activeTasks}
               onClick={() =>
                 dispatch({
                   type: 'ContentUpdate',
-                  newContent: <RenderAppearance />,
+                  newContent: state.enable.origin,
                 })
               }
             >

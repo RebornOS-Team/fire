@@ -13,7 +13,6 @@ import {useState, useEffect, useRef, useContext} from 'react';
 import {spawn} from 'child_process';
 import {StopWatch} from '../utils/stopWatch';
 import {Context} from '../utils/store';
-import {RenderAppearance} from './RenderAppearance';
 
 /**
  * @function RenderInstallation
@@ -24,8 +23,9 @@ import {RenderAppearance} from './RenderAppearance';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderInstallation() {
-  const [state, dispatch] = useContext(Context);
+  const {state, dispatch} = useContext(Context);
   const [commandOutput, setCommandOutput] = useState('');
+  const [pid, setPid] = useState();
   const AlwaysScrollToBottom = () => {
     const elementRef = useRef();
     useEffect(
@@ -39,10 +39,13 @@ export function RenderInstallation() {
     return <div ref={elementRef} />;
   };
   useEffect(() => {
-    if (!state.install.status) return;
+    if (!state.activeTasks) return;
     const commandWatch = new StopWatch();
     commandWatch.start();
-    const childProcess = spawn('pkexec', state.install.packageDeps);
+    const childProcess = spawn('pkexec', state.install.packageDeps, {
+      detached: true,
+    });
+    setPid(childProcess.pid);
     setTimeout(() =>
       setCommandOutput(
         x =>
@@ -59,6 +62,7 @@ export function RenderInstallation() {
       console.log(data.toString());
       setTimeout(() => setCommandOutput(x => `${x}${data.toString()}`), 450);
     });
+    childProcess.once('SIGTERM', process.exit);
     childProcess.once('close', (code, signal) => {
       commandWatch.stop();
       const out = signal ? `(${signal})` : '';
@@ -76,6 +80,7 @@ export function RenderInstallation() {
         deps: [],
         name: state.install.packageName,
         goto: <RenderInstallation />,
+        origin: state.install.origin,
       });
       new Notification(`Installation ${code === 0 ? 'Completed' : 'Failed'}!`, {
         icon: '/icon.png',
@@ -86,8 +91,9 @@ export function RenderInstallation() {
     });
   }, [
     state.install.packageDeps,
-    state.install.status,
     state.install.packageName,
+    state.activeTasks,
+    state.install.origin,
     dispatch,
   ]);
   const [scroll, setScroll] = useState(true);
@@ -130,23 +136,40 @@ export function RenderInstallation() {
             Scroll with output
           </Checkbox>
           <ButtonGroup justified>
-            <IconButton icon={<Icon icon="file-text" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="file-text" />}
+              appearance="ghost"
+              style={{
+                display: 'none',
+              }}
+            >
               Generate Log File
             </IconButton>
-            <IconButton icon={<Icon icon="stop" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="stop" />}
+              appearance="ghost"
+              onClick={() => process.kill(pid)}
+              disabled={!state.activeTasks}
+            >
               Abort
             </IconButton>
-            <IconButton icon={<Icon icon="link" />} appearance="ghost">
+            <IconButton
+              icon={<Icon icon="link" />}
+              appearance="ghost"
+              style={{
+                display: 'none',
+              }}
+            >
               PasteBinIt!
             </IconButton>
             <IconButton
               icon={<Icon icon="back-arrow" />}
               appearance="ghost"
-              disabled={state.install.status}
+              disabled={state.activeTasks}
               onClick={() =>
                 dispatch({
                   type: 'ContentUpdate',
-                  newContent: <RenderAppearance />,
+                  newContent: state.install.origin,
                 })
               }
             >

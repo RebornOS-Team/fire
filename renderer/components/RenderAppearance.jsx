@@ -12,7 +12,7 @@ import {
   ButtonGroup,
   PanelGroup,
 } from 'rsuite';
-import {useState, useContext} from 'react';
+import {useState, useContext, useEffect} from 'react';
 import {execSync} from 'child_process';
 import {Context} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
@@ -27,13 +27,11 @@ import {RenderUnInstallation} from './RenderUnInstallation';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderAppearance() {
-  // eslint-disable-next-line no-unused-vars
-  const [_, dispatch] = useContext(Context);
+  const {dispatch} = useContext(Context);
   const [scanPackages, setScanPackages] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showLastConfirmation, setShowLastConfirmation] = useState(false);
-  const [acceptedLastConfirm, setAcceptedLastConfirm] = useState(false);
-  const [pkg, setPkg] = useState('');
+  const [pkg, setPkg] = useState({});
   const [img, setImg] = useState({
     show: false,
     url: '',
@@ -144,32 +142,27 @@ export function RenderAppearance() {
       deps: ['rebornos-cosmic-xfce'],
     },
   ]);
-  if (scanPackages) {
+  useEffect(() => {
     const scanned = execSync('pacman -Qq').toString();
-    setScanPackages(x => !x);
-    setPackages(x => {
-      if (!scanned.length) {
-        return x;
-      }
-      return x.map(y => {
-        if (scanned.match(y.package)?.length) {
-          return {
-            name: y.name,
-            description: y.description,
-            image: y.image,
-            installed: true,
-            package: y.package,
-            deps: y.deps,
-          };
-        }
-        return y;
-      });
-    });
+    setPackages(x =>
+      x.map(y =>
+        scanned.match(y.package)?.length
+          ? {
+              name: y.name,
+              description: y.description,
+              image: y.image,
+              installed: true,
+              package: y.package,
+              deps: y.deps,
+            }
+          : y
+      )
+    );
     setRefresh({
       loading: false,
       text: 'Reload',
     });
-  }
+  }, [scanPackages]);
   return (
     <>
       <Row
@@ -188,14 +181,13 @@ export function RenderAppearance() {
               onSelect={() =>
                 setRefresh(x => {
                   if (!x.loading) {
-                    setScanPackages(x => !x);
+                    setScanPackages(y => !y);
                     return {
                       loading: true,
                       text: 'Reloading',
                     };
-                  } else {
-                    return x;
                   }
+                  return x;
                 })
               }
             >
@@ -212,72 +204,79 @@ export function RenderAppearance() {
             textAlign: 'center',
           }}
         >
-          {packages.map((x, i) => {
-            return (
-              <FlexboxGrid.Item
-                componentClass={Col}
-                colspan={28}
-                md={6}
-                key={i}
+          {packages.map((x, i) => (
+            <FlexboxGrid.Item
+              componentClass={Col}
+              colspan={28}
+              md={6}
+              key={i}
+              style={{
+                paddingBottom: '10px',
+                display: 'inline-flex',
+              }}
+            >
+              <Panel
+                shaded
+                bordered
+                bodyFill
                 style={{
-                  paddingBottom: '10px',
-                  display: 'inline-flex',
+                  width: 300,
                 }}
               >
+                <img
+                  src={x.image}
+                  height={169}
+                  width={300}
+                  onClick={() =>
+                    setImg({
+                      show: true,
+                      name: x.name,
+                      url: x.image,
+                    })
+                  }
+                  alt={x.name}
+                />
                 <Panel
-                  shaded
-                  bordered
+                  header={
+                    <>
+                      {x.name}
+                      <Divider />
+                      <ButtonGroup justified>
+                        <Button
+                          appearance="ghost"
+                          onClick={() => {
+                            setPkg(x);
+                            setShowConfirmation(true);
+                          }}
+                          disabled={x.installed}
+                        >
+                          {x.installed ? 'Installed' : 'Install'}
+                        </Button>
+                        <Button
+                          appearance="ghost"
+                          style={{
+                            display: 'none',
+                          }}
+                        >
+                          Theming
+                        </Button>
+                      </ButtonGroup>
+                    </>
+                  }
                   bodyFill
-                  style={{
-                    width: 300,
-                  }}
                 >
-                  <img
-                    src={x.image}
-                    height={169}
-                    width={300}
-                    onClick={() =>
-                      setImg({
-                        show: true,
-                        name: x.name,
-                        url: x.image,
-                      })
-                    }
-                  />
-                  <Panel
-                    header={
-                      <>
-                        {x.name}
-                        <Divider />
-                        <ButtonGroup justified>
-                          <Button
-                            appearance="ghost"
-                            onClick={() => {
-                              setPkg(x);
-                              setShowConfirmation(true);
-                            }}
-                          >
-                            {x.installed ? 'Un-Install' : 'Install'}
-                          </Button>
-                          <Button appearance="ghost">Theming</Button>
-                        </ButtonGroup>
-                      </>
-                    }
-                    bodyFill
+                  <Divider />
+                  <p
+                    style={{
+                      height: 145,
+                    }}
                   >
-                    <Divider />
-                    <p
-                      style={{
-                        height: 145,
-                      }}
-                    >
-                      {x.description}
-                    </p>
-                  </Panel>
+                    {x.description}
+                  </p>
                 </Panel>
-              </FlexboxGrid.Item>
-            );
-          })}
+              </Panel>
+            </FlexboxGrid.Item>
+          ))}
         </FlexboxGrid>
       </PanelGroup>
       <Modal
@@ -307,31 +306,28 @@ export function RenderAppearance() {
                     name: pkg.name,
                     deps: pkg.deps,
                     goto: <RenderInstallation />,
+                    origin: <RenderAppearance />,
                   });
-                  new Notification('Installation Started!', {
-                    icon: `/icon.png`,
+                  return new Notification('Installation Started!', {
+                    icon: '/icon.png',
                     body: `Installation started for: ${pkg.name}`,
                   });
-                } else {
-                  if (
-                    packages.filter(x => x.installed).length === 1 &&
-                    !acceptedLastConfirm
-                  ) {
-                    return setShowLastConfirmation(true);
-                  } else {
-                    dispatch({
-                      type: 'UnInstallationUpdate',
-                      status: true,
-                      name: pkg.name,
-                      deps: pkg.deps,
-                      goto: <RenderUnInstallation />,
-                    });
-                    new Notification('Un-Installation Started!', {
-                      icon: `/icon.png`,
-                      body: `Un-Installation started for: ${pkg.name}`,
-                    });
-                  }
                 }
+                if (packages.filter(x => x.installed).length === 1) {
+                  return setShowLastConfirmation(true);
+                }
+                dispatch({
+                  type: 'UnInstallationUpdate',
+                  status: true,
+                  name: pkg.name,
+                  deps: pkg.deps,
+                  goto: <RenderUnInstallation />,
+                  origin: <RenderAppearance />,
+                });
+                new Notification('Un-Installation Started!', {
+                  icon: '/icon.png',
+                  body: `Un-Installation started for: ${pkg.name}`,
+                });
               }}
               appearance="primary"
             >
@@ -368,16 +364,16 @@ export function RenderAppearance() {
             <Button
               onClick={() => {
                 setShowLastConfirmation(false);
-                setAcceptedLastConfirm(true);
                 dispatch({
                   type: 'UnInstallationUpdate',
                   status: true,
                   name: pkg.name,
                   deps: pkg.deps,
                   goto: <RenderUnInstallation />,
+                  origin: <RenderAppearance />,
                 });
                 new Notification('Un-Installation Started!', {
-                  icon: `/icon.png`,
+                  icon: '/icon.png',
                   body: `Un-Installation started for: ${pkg.name}`,
                 });
               }}
@@ -423,6 +419,7 @@ export function RenderAppearance() {
               height: '100%',
               resizeMode: 'contain',
             }}
+            alt={img.name}
           />
         </Modal.Body>
       </Modal>

@@ -1,22 +1,22 @@
-import {createContext, useReducer} from 'react';
+import {createContext, useReducer, Fragment} from 'react';
 import {RenderDashboard} from '../components/RenderDashboard';
 
 const initialState = {
   showAboutModal: false,
-  scanPackages: true,
+  activeTasks: false,
   content: <RenderDashboard />,
   install: {
-    status: false,
+    origin: <Fragment />,
     packageName: '',
     packageDeps: ['pacman', '-Sv', '--noconfirm', '--needed'],
   },
   uninstall: {
-    status: false,
+    origin: <Fragment />,
     packageName: '',
     packageDeps: ['pacman', '-Rv', '--noconfirm'],
   },
   enable: {
-    status: false,
+    origin: <Fragment />,
     packageName: '',
     packageDeps: ['systemctl', 'enable'],
   },
@@ -41,33 +41,36 @@ export const reducer = (state, action) => {
     case 'InstallationUpdate':
       return {
         ...state,
+        activeTasks: action.status,
         install: {
-          status: action.status,
           packageName: action.name,
           packageDeps: [
             ...['pacman', '-Sv', '--noconfirm', '--needed'],
             ...action.deps,
           ],
+          origin: action.origin,
         },
         content: action.goto,
       };
     case 'UnInstallationUpdate':
       return {
         ...state,
+        activeTasks: action.status,
         uninstall: {
-          status: action.status,
           packageName: action.name,
           packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
+          origin: action.origin,
         },
         content: action.goto,
       };
     case 'EnableUpdate':
       return {
         ...state,
+        activeTasks: action.status,
         enable: {
-          status: action.enable,
           packageName: action.name,
-          packageDeps: [...['systemctl', 'enable'], ...action.deps],
+          packageDeps: action.deps,
+          origin: action.origin,
         },
         content: action.goto,
       };
@@ -83,6 +86,6 @@ export const Context = createContext({
 export const GlobalStore = ({children}) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <Context.Provider value={[state, dispatch]}>{children}</Context.Provider>
+    <Context.Provider value={{state, dispatch}}>{children}</Context.Provider>
   );
 };

@@ -12,10 +12,12 @@ import {
   ButtonGroup,
   PanelGroup,
 } from 'rsuite';
-import {useState, useContext} from 'react';
+import {useState, useContext, useEffect} from 'react';
 import {execSync} from 'child_process';
 import {Context} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
+import {RenderUnInstallation} from './RenderUnInstallation';
+import {RenderEnable} from './RenderEnable';
 import {readlinkSync, existsSync} from 'fs';
 
 /**
@@ -27,11 +29,19 @@ import {readlinkSync, existsSync} from 'fs';
  * @returns {import('react').JSXElementConstructor} - React Body
  */
 export function RenderDMS() {
-  // eslint-disable-next-line no-unused-vars
-  const [_, dispatch] = useContext(Context);
+  const {dispatch} = useContext(Context);
+  const [currentDM, setCurrentDM] = useState('TTY');
   const [scanPackages, setScanPackages] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pkg, setPkg] = useState('');
+  const [showLastConfirmation, setShowLastConfirmation] = useState({
+    title: '',
+    body: '',
+    dispatchData: {},
+    notificationTitle: '',
+    notificationBody: '',
+    show: false,
+  });
+  const [pkg, setPkg] = useState({});
   const [img, setImg] = useState({
     show: false,
     url: '',
@@ -45,10 +55,10 @@ export function RenderDMS() {
     {
       name: 'LightDM',
       description: 'A lightweight display manager',
-      image: '/openbox.webp',
+      image: '/lightdm.webp',
       installed: false,
       package: /(lightdm)(-(devel|git))?/g,
-      deps: ['lightdm'],
+      deps: ['lightdm', 'lightdm-gtk-greeter'],
       enabled: false,
     },
     {
@@ -69,39 +79,45 @@ export function RenderDMS() {
       deps: ['gdm'],
       enabled: false,
     },
+    {
+      name: 'LXDM',
+      description: 'Lightweight X11 Display Manager',
+      image: '/lxdm.webp',
+      installed: false,
+      package: /(lxdm)(-(git|gtk3))?/g,
+      deps: ['lxdm-gtk3'],
+      enabled: false,
+    },
   ]);
-  if (scanPackages) {
+  useEffect(() => {
     const scanned = execSync('pacman -Qq').toString();
     const enabled = existsSync('/etc/systemd/system/display-manager.service')
-      ? readlinkSync('/etc/systemd/system/display-manager.service')?.match(
-          /(gd|sd|light)dm/g
-        )?.[0]
+      ? readlinkSync('/etc/systemd/system/display-manager.service')
+          ?.match(/[a-z]*\.service/g)?.[0]
+          ?.split('.')?.[0]
+          ?.toLowerCase()
       : 'TTY';
-    setScanPackages(x => !x);
-    setPackages(x => {
-      if (!scanned.length) {
-        return x;
-      }
-      return x.map(y => {
-        if (scanned.match(y.package)?.length) {
-          return {
-            name: y.name,
-            description: y.description,
-            image: y.image,
-            installed: true,
-            package: y.package,
-            deps: y.deps,
-            enabled: enabled === y.deps[0],
-          };
-        }
-        return y;
-      });
-    });
+    setCurrentDM(enabled);
+    setPackages(x =>
+      x.map(y =>
+        scanned.match(y.package)?.length
+          ? {
+              name: y.name,
+              description: y.description,
+              image: y.image,
+              installed: true,
+              package: y.package,
+              deps: y.deps,
+              enabled: enabled === y.name.toLowerCase(),
+            }
+          : y
+      )
+    );
     setRefresh({
       loading: false,
       text: 'Reload',
     });
-  }
+  }, [scanPackages]);
   return (
     <>
       <Row
@@ -120,14 +136,13 @@ export function RenderDMS() {
               onSelect={() =>
                 setRefresh(x => {
                   if (!x.loading) {
-                    setScanPackages(x => !x);
+                    setScanPackages(y => !y);
                     return {
                       loading: true,
                       text: 'Reloading',
                     };
-                  } else {
-                    return x;
                   }
+                  return x;
                 })
               }
             >
@@ -144,82 +159,86 @@ export function RenderDMS() {
             textAlign: 'center',
           }}
         >
-          {packages.map((x, i) => {
-            return (
-              <FlexboxGrid.Item
-                componentClass={Col}
-                colspan={28}
-                md={6}
-                key={i}
+          {packages.map((x, i) => (
+            <FlexboxGrid.Item
+              componentClass={Col}
+              colspan={28}
+              md={6}
+              key={i}
+              style={{
+                paddingBottom: '10px',
+                display: 'inline-flex',
+              }}
+            >
+              <Panel
+                shaded
+                bordered
+                bodyFill
                 style={{
-                  paddingBottom: '10px',
-                  display: 'inline-flex',
+                  width: 300,
                 }}
               >
+                <img
+                  src={x.image}
+                  height={169}
+                  width={300}
+                  onClick={() =>
+                    setImg({
+                      show: true,
+                      name: x.name,
+                      url: x.image,
+                    })
+                  }
+                  alt={x.name}
+                />
                 <Panel
-                  shaded
-                  bordered
+                  header={
+                    <>
+                      {x.name}
+                      <Divider />
+                      <ButtonGroup justified>
+                        <Button
+                          appearance="ghost"
+                          onClick={() => {
+                            setPkg({
+                              ...x,
+                              cmd: x.installed ? 'uninstall' : 'install',
+                            });
+                            setShowConfirmation(true);
+                          }}
+                        >
+                          {x.installed ? 'Un-Install' : 'Install'}
+                        </Button>
+                        <Button
+                          appearance="ghost"
+                          disabled={!x.installed && !x.enabled}
+                          onClick={() => {
+                            setPkg({
+                              ...x,
+                              cmd: x.enabled ? 'disable' : 'enable',
+                            });
+                            setShowConfirmation(true);
+                          }}
+                        >
+                          {x.enabled ? 'Disable' : 'Enable'}
+                        </Button>
+                      </ButtonGroup>
+                    </>
+                  }
                   bodyFill
-                  style={{
-                    width: 300,
-                  }}
                 >
-                  <img
-                    src={x.image}
-                    height={169}
-                    width={300}
-                    onClick={() =>
-                      setImg({
-                        show: true,
-                        name: x.name,
-                        url: x.image,
-                      })
-                    }
-                  />
-                  <Panel
-                    header={
-                      <>
-                        {x.name}
-                        <Divider />
-                        <ButtonGroup justified>
-                          <Button
-                            appearance="ghost"
-                            disabled={x.installed}
-                            onClick={() => {
-                              setPkg(x);
-                              setShowConfirmation(true);
-                            }}
-                          >
-                            {x.installed ? 'Installed' : 'Install'}
-                          </Button>
-                          <Button
-                            appearance="ghost"
-                            disabled={!x.installed}
-                            onClick={() => {
-                              setPkg(x);
-                              setShowConfirmation(true);
-                            }}
-                          >
-                            {x.installed ? 'Enabled' : 'Enable'}
-                          </Button>
-                        </ButtonGroup>
-                      </>
-                    }
-                    bodyFill
+                  <Divider />
+                  <p
+                    style={{
+                      height: 145,
+                    }}
                   >
-                    <Divider />
-                    <p
-                      style={{
-                        height: 145,
-                      }}
-                    >
-                      {x.description}
-                    </p>
-                  </Panel>
+                    {x.description}
+                  </p>
                 </Panel>
-              </FlexboxGrid.Item>
-            );
-          })}
+              </Panel>
+            </FlexboxGrid.Item>
+          ))}
         </FlexboxGrid>
       </PanelGroup>
       <Modal
@@ -233,23 +252,145 @@ export function RenderDMS() {
         }}
       >
         <Modal.Header closeButton={false}>Are you sure?</Modal.Header>
-        <Modal.Body>You are about to install: {pkg.name}</Modal.Body>
+        <Modal.Body>
+          You are about to {pkg.cmd}: {pkg.name}
+        </Modal.Body>
         <Modal.Footer>
           <ButtonGroup justified>
             <Button
               onClick={() => {
                 setShowConfirmation(false);
-                dispatch({
-                  type: 'InstallationUpdate',
-                  status: true,
-                  name: pkg.name,
-                  deps: pkg.deps,
-                  goto: <RenderInstallation />,
-                });
-                new Notification('Installation Started!', {
-                  icon: `/icon.png`,
-                  body: `Installation started for: ${pkg.name}`,
-                });
+                switch (pkg.cmd) {
+                  case 'install':
+                    dispatch({
+                      type: 'InstallationUpdate',
+                      status: true,
+                      name: pkg.name,
+                      deps: pkg.deps,
+                      goto: <RenderInstallation />,
+                      origin: <RenderDMS />,
+                    });
+                    new Notification('Installation Started!', {
+                      icon: '/icon.png',
+                      body: `Installation started for: ${pkg.name}`,
+                    });
+                    break;
+                  case 'uninstall':
+                    if (
+                      packages.filter(x => x.installed).length === 1 &&
+                      pkg.enabled
+                    ) {
+                      return setShowLastConfirmation({
+                        title: (
+                          <>
+                            <Icon icon="warning" /> Warning: Last DM Detected
+                          </>
+                        ),
+                        body: `If you un-install ${pkg.name}, you will be left with no desktop manager! Are you sure you want to do this?`,
+                        show: true,
+                        notificationTitle: `Un-Installation Started!`,
+                        notificationBody: `Un-Installation started for: ${pkg.name}`,
+                        dispatchData: {
+                          type: 'UnInstallationUpdate',
+                          status: true,
+                          name: pkg.name,
+                          deps: pkg.deps,
+                          goto: <RenderUnInstallation />,
+                          origin: <RenderDMS />,
+                        },
+                      });
+                    } else {
+                      dispatch({
+                        type: 'UnInstallationUpdate',
+                        status: true,
+                        name: pkg.name,
+                        deps: pkg.deps,
+                        goto: <RenderUnInstallation />,
+                        origin: <RenderDMS />,
+                      });
+                      new Notification('Un-Installation Started!', {
+                        icon: '/icon.png',
+                        body: `Un-Installation started for: ${pkg.name}`,
+                      });
+                    }
+                    break;
+                  case 'enable':
+                    if (currentDM !== 'TTY') {
+                      return setShowLastConfirmation({
+                        title: (
+                          <>
+                            <Icon icon="warning" /> Warning: DM Conflict
+                            Detected
+                          </>
+                        ),
+                        body: `If you enable ${
+                          pkg.name
+                        }, ${currentDM.toUpperCase()} will be disabled! Are you sure you want to do this?`,
+                        show: true,
+                        notificationTitle: `Enabling ${pkg.name}`,
+                        notificationBody: `Disabling: ${currentDM.toUpperCase()} and Enabling: ${
+                          pkg.name
+                        }`,
+                        dispatchData: {
+                          type: 'EnableUpdate',
+                          status: true,
+                          name: pkg.name,
+                          deps: [
+                            'sh',
+                            '-c',
+                            `"systemctl disable ${currentDM}.service && systemctl enable ${pkg.name.toLowerCase()}.service"`,
+                          ],
+                          goto: <RenderEnable />,
+                          origin: <RenderDMS />,
+                        },
+                      });
+                    } else {
+                      dispatch({
+                        type: 'EnableUpdate',
+                        status: true,
+                        name: pkg.name,
+                        deps: [
+                          'systemctl',
+                          'enable',
+                          `${pkg.name.toLowerCase()}.service`,
+                        ],
+                        goto: <RenderEnable />,
+                        origin: <RenderDMS />,
+                      });
+                      new Notification(`Enabling ${pkg.name}`, {
+                        icon: '/icon.png',
+                        body: `Enabling ${pkg.name}`,
+                      });
+                    }
+                    break;
+                  case 'disable':
+                    setShowLastConfirmation({
+                      title: (
+                        <>
+                          <Icon icon="warning" /> Warning: No DM Access
+                        </>
+                      ),
+                      body: `If you disable ${pkg.name}, You will not have any DM enabled! Are you sure you want to do this?`,
+                      show: true,
+                      notificationTitle: `Disabling ${pkg.name}`,
+                      notificationBody: `Disabling: ${pkg.name}`,
+                      dispatchData: {
+                        type: 'EnableUpdate',
+                        status: true,
+                        name: pkg.name,
+                        deps: [
+                          'systemctl',
+                          'disable',
+                          `${pkg.name.toLowerCase()}.service`,
+                        ],
+                        goto: <RenderEnable />,
+                        origin: <RenderDMS />,
+                      },
+                    });
+                    break;
+                  default:
+                    break;
+                }
               }}
               appearance="primary"
             >
@@ -265,8 +406,46 @@ export function RenderDMS() {
         </Modal.Footer>
       </Modal>
       <Modal
+        size="xs"
+        show={showLastConfirmation.show}
+        onHide={() => setShowLastConfirmation({})}
+        backdrop="static"
+        keyboard={false}
+        style={{
+          textAlign: 'center',
+        }}
+      >
+        <Modal.Header closeButton={false}>
+          {showLastConfirmation.title}
+        </Modal.Header>
+        <Modal.Body>{showLastConfirmation.body}</Modal.Body>
+        <Modal.Footer>
+          <ButtonGroup justified>
+            <Button
+              onClick={() => {
+                dispatch(showLastConfirmation.dispatchData);
+                new Notification(showLastConfirmation.notificationTitle, {
+                  icon: '/icon.png',
+                  body: showLastConfirmation.notificationBody,
+                });
+                setShowLastConfirmation({});
+              }}
+              appearance="primary"
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={() => setShowLastConfirmation({})}
+              appearance="subtle"
+            >
+              Cancel
+            </Button>
+          </ButtonGroup>
+        </Modal.Footer>
+      </Modal>
+      <Modal
         overflow={false}
-        full
+        full={true}
         show={img.show}
         style={{
           textAlign: 'center',
@@ -293,6 +472,7 @@ export function RenderDMS() {
               height: '100%',
               resizeMode: 'contain',
             }}
+            alt={img.name}
           />
         </Modal.Body>
       </Modal>
