@@ -1,21 +1,31 @@
 {
   "env": {
     "es2021": true,
-    "node": true
+    "shared-node-browser": true
   },
   "extends": [
     "eslint:recommended",
+    "react-app",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "google",
     "plugin:prettier/recommended",
     "plugin:jsdoc/recommended"
   ],
   "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true,
+      "impliedStrict": true
+    },
     "ecmaVersion": 2021,
     "sourceType": "module"
   },
   "settings": {
     "jsdoc": {
       "mode": "typescript"
+    },
+    "react": {
+      "version": "detect"
     }
   },
   "rules": {

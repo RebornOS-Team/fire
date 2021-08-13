@@ -1,0 +1,43 @@
+{
+  "name": "rebornos-fire-renderer",
+  "description": "RebornOS Fire (Renderer)",
+  "version": "1.0.0-Pre-Alpha",
+  "author": {
+    "name": "SoulHarsh007",
+    "email": "harshtheking@hotmail.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "url": "https://gitlab.com/rebornos-team/applications/fire",
+    "type": "git"
+  },
+  "private": true,
+  "homepage": "./",
+  "packageManager": "yarn@3.0.0",
+  "dependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rsuite": "4.10.2",
+    "xterm": "4.13.0"
+  },
+  "devDependencies": {
+    "@craco/craco": "6.2.0",
+    "eslint-plugin-react": "7.24.0",
+    "eslint-plugin-react-hooks": "4.2.0",
+    "react-scripts": "4.0.3"
+  },
+  "scripts": {
+    "dev": "BROWSER=none craco start",
+    "build": "GENERATE_SOURCEMAP=false BUILD_PATH='../app' craco build",
+    "test": "craco test",
+    "eject": "craco eject"
+  },
+  "browserslist": {
+    "production": [
+      "last 1 chrome version"
+    ],
+    "development": [
+      "last 1 chrome version"
+    ]
+  }
+}

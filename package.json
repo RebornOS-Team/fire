@@ -1,8 +1,9 @@
 {
-  "private": true,
   "name": "rebornos-fire",
   "description": "RebornOS Fire",
-  "version": "1.0.0",
+  "private": true,
+  "version": "1.0.0-Pre-Alpha",
+  "packageManager": "yarn@3.0.0",
   "author": {
     "name": "SoulHarsh007",
     "email": "harshtheking@hotmail.com"
@@ -12,43 +13,45 @@
     "url": "https://gitlab.com/rebornos-team/applications/fire",
     "type": "git"
   },
-  "main": "app/background.js",
+  "main": "app/index.js",
   "homepage": "https://rebornos.org/",
   "scripts": {
-    "prepare": "yarn run next telemetry disable",
-    "dev": "nextron",
+    "dev": "node ./electron-dev.js",
     "build:dist": "yarn build:pack && yarn build:make",
-    "build:pack": "yarn build && yarn build:package",
-    "build": "nextron build --linux",
+    "build:pack": "yarn build:release && yarn build:package",
+    "build:release": "yarn build:all && electron-builder build --linux",
+    "build:main": "NODE_ENV=production webpack",
+    "build:renderer": "cd renderer && yarn build",
+    "build:all": "yarn build:renderer && yarn build:main",
     "build:package": "./builder.sh",
     "build:make": "makepkg -Ciscf --config ./makepkg.conf",
     "postinstall": "electron-builder install-app-deps"
   },
-  "browserslist": [
-    "chrome 91"
-  ],
+  "browserslist": {
+    "production": [
+      "last 1 chrome version"
+    ],
+    "development": [
+      "last 1 chrome version"
+    ]
+  },
   "dependencies": {
-    "electron-serve": "1.1.0"
+    "electron-serve": "1.1.0",
+    "node-pty": "0.10.1"
   },
   "devDependencies": {
-    "@types/react": "17.0.11",
-    "critters": "0.0.10",
-    "electron": "13.1.2",
+    "electron": "13.1.9",
     "electron-builder": "22.11.7",
-    "eslint": "7.29.0",
+    "eslint": "7.32.0",
     "eslint-config-google": "0.14.0",
-    "eslint-config-next": "11.0.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-jsdoc": "35.3.2",
+    "eslint-plugin-jsdoc": "36.0.7",
     "eslint-plugin-prettier": "3.4.0",
-    "eslint-plugin-react": "7.24.0",
-    "eslint-plugin-react-hooks": "4.2.0",
-    "next": "11.0.0",
-    "nextron": "6.0.6",
-    "prettier": "2.3.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "rsuite": "4.10.2"
+    "node-gyp": "8.1.0",
+    "node-loader": "2.0.0",
+    "prettier": "2.3.2",
+    "webpack": "5.50.0",
+    "webpack-cli": "4.7.2"
   },
   "build": {
     "appId": "org.rebornos.fire",
