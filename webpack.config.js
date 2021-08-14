@@ -1,5 +1,5 @@
 const {join} = require('path');
-const externals = require(join(process.cwd(), 'package.json')).dependencies;
+const externals = require('./package.json').dependencies;
 
 module.exports = {
   mode: process.env.NODE_ENV,

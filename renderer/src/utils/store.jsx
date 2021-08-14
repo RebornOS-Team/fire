@@ -18,6 +18,7 @@ const initialState = {
   },
   terminal: true,
 };
+
 export const reducer = (state, action) => {
   switch (action.type) {
     case 'AboutModal':
@@ -79,10 +80,12 @@ export const reducer = (state, action) => {
       return state;
   }
 };
+
 export const Context = createContext({
   state: initialState,
   dispatch: () => null,
 });
+
 // eslint-disable-next-line react/prop-types
 export const GlobalStore = ({children}) => {
   const [state, dispatch] = useReducer(reducer, initialState);

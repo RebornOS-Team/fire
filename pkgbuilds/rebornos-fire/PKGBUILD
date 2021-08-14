@@ -1,0 +1,40 @@
+# Maintainer: SoulHarsh007 <harshtheking@hotmail.com>
+
+pkgname="rebornos-fire"
+_pkgname="rebornos-fire"
+pkgver=
+_pkgver=1.0.0
+pkgrel=1
+_pkg="linux-unpacked"
+pkgdesc="Management utility for RebornOS"
+arch=('x86_64')
+url="https://rebornos.org/"
+license=('GPL3')
+makedepends=('yarn')
+depends=('libnotify' 'polkit')
+# optdepends=('pastebinit: Needed for sharing logs via pastebin')
+source=("fire.desktop" "LICENSE" "fire.svg" "$pkgname-$pkgver.tar.gz::https://gitlab.com/rebornos-team/applications/fire/releases/download/v$pkgver/rebornos-fire-$pkgver.tar.gz")
+provides=("rebornos-fire")
+conflicts=("rebornos-fire-git")
+noextract=("$pkgname-$pkgver.tar.gz")
+
+prepare() {
+	mkdir -p fire
+	bsdtar -xf "$pkgname-$pkgver.tar.gz" -C fire
+	chmod +x fire/fire
+}
+
+package() {
+  cd fire
+  install -d "${pkgdir}/usr/share/licenses/${_pkgname}"
+  install -d "${pkgdir}/opt/${_pkgname}"
+  install -d "${pkgdir}/usr/bin"
+  install -d "${pkgdir}/usr/share/applications"
+  install -d "${pkgdir}/usr/share/icons"
+  install -d "${pkgdir}/usr/share/pixmaps"
+  install -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+  install -m644 "fire.svg" "${pkgdir}/usr/share/pixmaps/fire.svg"
+  install -m644 "fire.desktop" "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+  cp -r "./${_pkg}/"* "${pkgdir}/opt/${_pkgname}" -R
+  ln -s /opt/${_pkgname}/fire "${pkgdir}"/usr/bin/rebornos-fire
+}

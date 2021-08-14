@@ -40,7 +40,7 @@ export function RenderAbout() {
           <h6>RebornOS Fire</h6>
           <br />
           <p>
-            v1.0.0-Pre-Alpha
+            v{process.env.VERSION}
             <br />
             System management utility for RebornOS
             <br />

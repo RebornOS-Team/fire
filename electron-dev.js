@@ -1,3 +1,4 @@
+// eslint-disable-next-line security/detect-child-process
 const {spawn} = require('child_process');
 const webpack = require('webpack');
 
@@ -54,6 +55,7 @@ const webpack = require('webpack');
   };
   startRendererProcess();
   await new Promise(resolve => setTimeout(resolve, 12000));
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const watching = webpack({
     ...require('./webpack.config'),
     mode: 'development',

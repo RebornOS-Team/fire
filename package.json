@@ -2,7 +2,7 @@
   "name": "rebornos-fire",
   "description": "RebornOS Fire",
   "private": true,
-  "version": "1.0.0-Pre-Alpha",
+  "version": "1.0.0-rc-1",
   "packageManager": "yarn@3.0.0",
   "author": {
     "name": "SoulHarsh007",
@@ -17,13 +17,12 @@
   "homepage": "https://rebornos.org/",
   "scripts": {
     "dev": "node ./electron-dev.js",
-    "build:dist": "yarn build:pack && yarn build:make",
-    "build:pack": "yarn build:release && yarn build:package",
+    "build:dist": "yarn build:release && yarn build:package",
     "build:release": "yarn build:all && electron-builder build --linux",
     "build:main": "NODE_ENV=production webpack",
     "build:renderer": "cd renderer && yarn build",
     "build:all": "yarn build:renderer && yarn build:main",
-    "build:package": "./builder.sh",
+    "build:package": "./builder.sh && yarn build:make",
     "build:make": "makepkg -Ciscf --config ./makepkg.conf",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -47,6 +46,7 @@
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-jsdoc": "36.0.7",
     "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-security": "1.4.0",
     "node-gyp": "8.1.0",
     "node-loader": "2.0.0",
     "prettier": "2.3.2",
