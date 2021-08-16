@@ -11,6 +11,22 @@
       "problemMatcher": [],
       "label": "Build and Install",
       "detail": "yarn build:pack && yarn build:make"
+    },
+    {
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": ""
+        },
+        "background": {
+          "beginsPattern": "started server",
+          "endsPattern": "Debugger listening on"
+        }
+      },
+      "label": "Debug"
     }
   ]
 }

@@ -2,7 +2,7 @@
   "name": "rebornos-fire",
   "description": "RebornOS Fire",
   "private": true,
-  "version": "1.0.0-rc-1",
+  "version": "1.0.0-rc-2",
   "packageManager": "yarn@3.0.0",
   "author": {
     "name": "SoulHarsh007",
@@ -35,10 +35,13 @@
     ]
   },
   "dependencies": {
+    "@nia3208/centra": "1.0.9-1",
+    "bs58": "4.0.1",
     "electron-serve": "1.1.0",
     "node-pty": "0.10.1"
   },
   "devDependencies": {
+    "@types/bs58": "4.0.1",
     "electron": "13.1.9",
     "electron-builder": "22.11.7",
     "eslint": "7.32.0",
@@ -51,7 +54,7 @@
     "node-loader": "2.0.0",
     "prettier": "2.3.2",
     "webpack": "5.50.0",
-    "webpack-cli": "4.7.2"
+    "webpack-cli": "4.8.0"
   },
   "build": {
     "appId": "org.rebornos.fire",

@@ -1,14 +1,11 @@
 const {performance} = require('perf_hooks');
 
-/**
- * @author SoulHarsh007 <harshtheking@hotmail.com>
- * @copyright SoulHarsh007 2021
- * @since v1.0.0-Pre-Alpha
- * @class StopWatch
- * @description Used to measure time taken
- */
 module.exports = class StopWatch {
   /**
+   * @class StopWatch
+   * @author SoulHarsh007 <harshtheking@hotmail.com>
+   * @copyright SoulHarsh007 2021
+   * @since v1.0.0-Pre-Alpha
    * @class StopWatch
    * @description Used to measure time taken
    */

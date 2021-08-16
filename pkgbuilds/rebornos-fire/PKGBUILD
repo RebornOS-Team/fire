@@ -1,8 +1,7 @@
 # Maintainer: SoulHarsh007 <harshtheking@hotmail.com>
-
 pkgname="rebornos-fire"
 _pkgname="rebornos-fire"
-pkgver=1.0.0_rc_1
+pkgver=1.0.0_rc_2
 _pkgver="${pkgver//_/-}"
 pkgrel=1
 _pkg="linux-unpacked"
@@ -12,7 +11,6 @@ url="https://rebornos.org/"
 license=('GPL3')
 makedepends=('yarn')
 depends=('libnotify' 'polkit')
-# optdepends=('pastebinit: Needed for sharing logs via pastebin')
 source=(
   "fire.desktop"
   "LICENSE"
@@ -26,7 +24,7 @@ sha256sums=(
   'cd1ae26dccdf81bf8f1c11c5dcca9c07de116cc9d7d2f6a82fbce57424e244a6'
   '4257c04bf65197b0282d1a0105d01d9b273153f7dee1588bdf52dc9071618de7'
   '5f0db1f929b6b76a5291ea1b90c4307d30b7e8605ab56d267790214291640c05'
-  '120efd759ff8e1f550fa4fd2df307e926070348255ccea755596a791b3e95b9f'
+  'a566df7c3b93b0e8db6540f9704f6871a83af243653e970e30848a676f6884b4'
 )
 
 prepare() {

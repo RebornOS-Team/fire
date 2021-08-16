@@ -1,5 +1,4 @@
 # Maintainer: SoulHarsh007 <harshtheking@hotmail.com>
-
 pkgname="rebornos-fire"
 _pkgname="rebornos-fire"
 pkgver=1.0.0
@@ -11,7 +10,6 @@ arch=('x86_64')
 url="https://rebornos.org/"
 license=('GPL3')
 depends=('libnotify' 'polkit')
-# optdepends=('pastebinit: Needed for sharing logs via pastebin')
 source=("fire.desktop" "LICENSE" "fire.svg")
 source_x86_64=("${_pkg}.tar.gz")
 sha256sums=('cd1ae26dccdf81bf8f1c11c5dcca9c07de116cc9d7d2f6a82fbce57424e244a6'

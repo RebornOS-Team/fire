@@ -18,7 +18,6 @@ export function RenderEnable() {
     if (!state.activeTasks) {
       return;
     }
-    ipcRenderer.send('termExec', state.enable.packageDeps);
     ipcRenderer.once('termExit', (_event, data) => {
       dispatch({
         type: 'EnableUpdate',
@@ -40,7 +39,7 @@ export function RenderEnable() {
       );
     });
   }, [
-    state.enable.packageDeps,
+    state.packageDeps,
     state.packageName,
     state.origin,
     state.activeTasks,

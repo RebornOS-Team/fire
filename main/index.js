@@ -1,8 +1,30 @@
 const {app, BrowserWindow, dialog, ipcMain} = require('electron');
 const serve = require('electron-serve');
-const {spawn} = require('node-pty');
-const StopWatch = require('./stopwatch');
+const {inspect} = require('util');
+const TerminalManager = require('./terminal');
+const Logger = require('./logger');
+const args = require('./argsParser')();
+const logger = new Logger('RebornOS Fire Main');
 
+logger.log(`Start TimeStamp: ${new Date()}`, 'INFO');
+if (process.env.DEBUG || args.debug) {
+  logger.log(`Raw Args: ${process.argv.slice(2)}`, 'DEBUG');
+  process
+    .on('unhandledRejection', (reason, promise) =>
+      logger.log(
+        `Unhandled Rejection at: ${inspect(promise)} reason: ${inspect(
+          reason
+        )}`,
+        'ERROR'
+      )
+    )
+    .on('uncaughtException', (err, origin) =>
+      logger.log(`Error: ${inspect(err)} at ${inspect(origin)}`, 'ERROR')
+    )
+    .on('warning', e => logger.log(`${inspect(e)}`, 'WARN'));
+}
+
+logger.log(`Spawn Args: ${JSON.stringify(args) || 'None'}`, 'INFO');
 let runningTasks = false;
 process.env.NODE_ENV === 'production'
   ? serve({
@@ -10,34 +32,6 @@ process.env.NODE_ENV === 'production'
     })
   : app.setPath('userData', `${app.getPath('userData')} (development)`);
 app.whenReady().then(() => {
-  ipcMain.on('termExec', (_event, command) => {
-    mainWindow.webContents.send('termData', '\x1bc');
-    const stopwatch = new StopWatch();
-    stopwatch.start();
-    const term = spawn('pkexec', command, {
-      name: 'xterm-color',
-      env: process.env,
-      rows: 30,
-    });
-    mainWindow.webContents.send(
-      'termData',
-      `Process spawned with command: pkexec ${command.join(' ')}, PID: ${
-        term.pid
-      }\n`
-    );
-    ipcMain.on('termKill', () => term.kill('SIGTERM'));
-    ipcMain.on('termResize', (_event, cols, rows) => term.resize(cols, rows));
-    term.onData(data => mainWindow.webContents.send('termData', data));
-    term.onExit(data => {
-      stopwatch.stop();
-      mainWindow.webContents.send('termExit', {
-        ...data,
-        time: stopwatch.toString(),
-      });
-      ipcMain.removeAllListeners('termKill');
-      ipcMain.removeAllListeners('termResize');
-    });
-  });
   const mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
@@ -49,26 +43,49 @@ app.whenReady().then(() => {
       contextIsolation: false,
     },
   });
+  ipcMain.on('termExec', (_event, command, pkg) => {
+    const terminal = new TerminalManager(mainWindow, pkg, command);
+    terminal.handleCommandExecution();
+    ipcMain.on('termResize', (_event, cols, rows) =>
+      terminal.resizeTerminal(cols, rows)
+    );
+    ipcMain.on('generateLogs', () => terminal.generateLogs());
+    ipcMain.on('privateBin', () => terminal.privateBin());
+  });
   mainWindow.once('ready-to-show', mainWindow.show);
-  mainWindow.on('close', e => {
+  mainWindow.on('close', async e => {
+    e.preventDefault();
+    await logger
+      .generateLogFile()
+      .then(x => logger.log(`Log File: ${x}`, 'DEBUG'));
     if (runningTasks) {
-      e.preventDefault();
       const choice = dialog.showMessageBoxSync(mainWindow, {
         type: 'question',
         buttons: ['Yes', 'No'],
         title: 'Warning: Active Tasks',
         message: 'There are tasks running, are you sure you want to exit?',
       });
-      if (!choice) {
-        mainWindow.destroy();
+      if (choice) {
+        return;
       }
     }
+    mainWindow.destroy();
   });
-  ipcMain.handle('StateChange', (_event, state) => (runningTasks = state));
+  ipcMain.on('StateChange', (_event, state) => (runningTasks = state));
+  ipcMain.on('log', (_event, data, type, meta) => logger.log(data, type, meta));
+  ipcMain.on('debug', (_event, data) =>
+    logger.log(
+      data,
+      'DEBUG',
+      'RebornOS Fire Renderer',
+      !(process.env.DEBUG || args.debug)
+    )
+  );
   if (process.env.NODE_ENV === 'production') {
     mainWindow.setMenu(null);
     return mainWindow.loadURL('app://./index.html');
   }
   mainWindow.loadURL(`http://localhost:${process.env.PORT}/`);
 });
+
 app.once('window-all-closed', app.quit);

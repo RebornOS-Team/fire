@@ -21,7 +21,7 @@ import {
 export default function App() {
   const {state} = useGlobalStore();
   useEffect(() => {
-    ipcRenderer.invoke('StateChange', state.activeTasks);
+    ipcRenderer.send('StateChange', state.activeTasks);
   }, [state.activeTasks]);
   return (
     <Container>

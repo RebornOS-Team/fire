@@ -45,7 +45,7 @@ export function RenderAppearance() {
     {
       name: 'Openbox',
       description:
-        'Not actually a desktop environment, Openbox is a highly configurable window manager. It is known for its minimalistic appearance and its flexibility. It is the most lightweight graphical option offered by RebornOS. Please Note: Openbox is not recommended for users who are new to Linux.',
+        'Openbox is a highly configurable window manager. It is known for its minimalistic appearance and its flexibility. It is the most lightweight graphical option offered by RebornOS. Please Note: Openbox is not recommended for users who are new to Linux.',
       image: '/openbox.webp',
       installed: false,
       package: /(openbox)/g,
@@ -166,14 +166,13 @@ export function RenderAppearance() {
       x.map(y =>
         scanned.match(y.package)?.length
           ? {
-              name: y.name,
-              description: y.description,
-              image: y.image,
+              ...y,
               installed: true,
-              package: y.package,
-              deps: y.deps,
             }
-          : y
+          : {
+              ...y,
+              installed: false,
+            }
       )
     );
     setRefresh({
@@ -196,7 +195,7 @@ export function RenderAppearance() {
             <Nav.Item
               icon={<Icon icon="refresh" pulse={refresh.loading} />}
               eventKey="1"
-              onSelect={() =>
+              onClick={() =>
                 setRefresh(x => {
                   if (!x.loading) {
                     setScanPackages(y => !y);

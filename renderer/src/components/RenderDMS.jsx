@@ -125,7 +125,7 @@ export function RenderDMS() {
           textAlign: 'center',
         }}
       >
-        <Panel header={<h3>Display Managers</h3>} bodyFill></Panel>
+        <Panel header={<h3>Display Managers</h3>} bodyFill />
       </Row>
       <Navbar>
         <Navbar.Body>
@@ -133,7 +133,7 @@ export function RenderDMS() {
             <Nav.Item
               icon={<Icon icon="refresh" pulse={refresh.loading} />}
               eventKey="1"
-              onSelect={() =>
+              onClick={() =>
                 setRefresh(x => {
                   if (!x.loading) {
                     setScanPackages(y => !y);
@@ -301,21 +301,20 @@ export function RenderDMS() {
                           terminal: true,
                         },
                       });
-                    } else {
-                      dispatch({
-                        type: 'UnInstallationUpdate',
-                        status: true,
-                        name: pkg.name,
-                        deps: pkg.deps,
-                        goto: <RenderUnInstallation />,
-                        origin: <RenderDMS />,
-                        terminal: true,
-                      });
-                      new Notification('Un-Installation Started!', {
-                        icon: '/icon.png',
-                        body: `Un-Installation started for: ${pkg.name}`,
-                      });
                     }
+                    dispatch({
+                      type: 'UnInstallationUpdate',
+                      status: true,
+                      name: pkg.name,
+                      deps: pkg.deps,
+                      goto: <RenderUnInstallation />,
+                      origin: <RenderDMS />,
+                      terminal: true,
+                    });
+                    new Notification('Un-Installation Started!', {
+                      icon: '/icon.png',
+                      body: `Un-Installation started for: ${pkg.name}`,
+                    });
                     break;
                   case 'enable':
                     if (currentDM !== 'TTY') {
@@ -341,32 +340,31 @@ export function RenderDMS() {
                           deps: [
                             'sh',
                             '-c',
-                            `"systemctl disable ${currentDM}.service && systemctl enable ${pkg.name.toLowerCase()}.service"`,
+                            `systemctl disable ${currentDM}.service && systemctl enable ${pkg.name.toLowerCase()}.service`,
                           ],
                           goto: <RenderEnable />,
                           origin: <RenderDMS />,
                           terminal: true,
                         },
                       });
-                    } else {
-                      dispatch({
-                        type: 'EnableUpdate',
-                        status: true,
-                        name: pkg.name,
-                        deps: [
-                          'systemctl',
-                          'enable',
-                          `${pkg.name.toLowerCase()}.service`,
-                        ],
-                        goto: <RenderEnable />,
-                        origin: <RenderDMS />,
-                        terminal: true,
-                      });
-                      new Notification(`Enabling ${pkg.name}`, {
-                        icon: '/icon.png',
-                        body: `Enabling ${pkg.name}`,
-                      });
                     }
+                    dispatch({
+                      type: 'EnableUpdate',
+                      status: true,
+                      name: pkg.name,
+                      deps: [
+                        'systemctl',
+                        'enable',
+                        `${pkg.name.toLowerCase()}.service`,
+                      ],
+                      goto: <RenderEnable />,
+                      origin: <RenderDMS />,
+                      terminal: true,
+                    });
+                    new Notification(`Enabling ${pkg.name}`, {
+                      icon: '/icon.png',
+                      body: `Enabling ${pkg.name}`,
+                    });
                     break;
                   case 'disable':
                     setShowLastConfirmation({
@@ -457,13 +455,11 @@ export function RenderDMS() {
           textAlign: 'center',
         }}
         onHide={() =>
-          setImg(x => {
-            return {
-              show: false,
-              url: x.url,
-              name: '',
-            };
-          })
+          setImg(x => ({
+            show: false,
+            url: x.url,
+            name: '',
+          }))
         }
       >
         <Modal.Header>

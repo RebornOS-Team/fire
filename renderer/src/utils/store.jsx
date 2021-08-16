@@ -1,3 +1,4 @@
+import {ipcRenderer} from 'electron';
 import React, {createContext, useReducer, Fragment, useContext} from 'react';
 import {RenderDashboard} from '../components/RenderDashboard';
 
@@ -7,19 +8,15 @@ const initialState = {
   content: <RenderDashboard />,
   origin: <Fragment />,
   packageName: '',
-  install: {
-    packageDeps: ['pacman', '-Sv', '--noconfirm', '--needed'],
-  },
-  uninstall: {
-    packageDeps: ['pacman', '-Rv', '--noconfirm'],
-  },
-  enable: {
-    packageDeps: ['systemctl', 'enable'],
-  },
+  packageDeps: [],
   terminal: true,
 };
 
 export const reducer = (state, action) => {
+  ipcRenderer.send(
+    'debug',
+    `State: ${JSON.stringify(state)}, Action: ${JSON.stringify(action)}`
+  );
   switch (action.type) {
     case 'AboutModal':
       return {
@@ -43,12 +40,10 @@ export const reducer = (state, action) => {
         activeTasks: action.status,
         packageName: action.name,
         origin: action.origin,
-        install: {
-          packageDeps: [
-            ...['pacman', '-Sv', '--noconfirm', '--needed'],
-            ...action.deps,
-          ],
-        },
+        packageDeps: [
+          ...['pacman', '-Sv', '--noconfirm', '--needed'],
+          ...action.deps,
+        ],
         content: action.goto,
         terminal: action.terminal,
       };
@@ -58,9 +53,7 @@ export const reducer = (state, action) => {
         activeTasks: action.status,
         packageName: action.name,
         origin: action.origin,
-        uninstall: {
-          packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
-        },
+        packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
         content: action.goto,
         terminal: action.terminal,
       };
@@ -70,9 +63,7 @@ export const reducer = (state, action) => {
         activeTasks: action.status,
         packageName: action.name,
         origin: action.origin,
-        enable: {
-          packageDeps: action.deps,
-        },
+        packageDeps: action.deps,
         content: action.goto,
         terminal: action.terminal,
       };

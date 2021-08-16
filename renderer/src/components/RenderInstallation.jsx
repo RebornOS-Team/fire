@@ -18,7 +18,6 @@ export function RenderInstallation() {
     if (!state.activeTasks) {
       return;
     }
-    ipcRenderer.send('termExec', state.install.packageDeps);
     ipcRenderer.once('termExit', (_event, data) => {
       new Notification(
         `Installation ${
@@ -42,7 +41,7 @@ export function RenderInstallation() {
       });
     });
   }, [
-    state.install.packageDeps,
+    state.packageDeps,
     state.packageName,
     state.activeTasks,
     state.origin,

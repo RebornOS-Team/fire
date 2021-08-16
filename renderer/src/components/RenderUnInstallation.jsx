@@ -16,7 +16,6 @@ export function RenderUnInstallation() {
   const {state, dispatch} = useGlobalStore();
   useEffect(() => {
     if (!state.activeTasks) return;
-    ipcRenderer.send('termExec', state.uninstall.packageDeps);
     ipcRenderer.once('termExit', (_event, data) => {
       dispatch({
         type: 'UnInstallationUpdate',
@@ -40,7 +39,7 @@ export function RenderUnInstallation() {
       );
     });
   }, [
-    state.uninstall.packageDeps,
+    state.packageDeps,
     state.packageName,
     state.activeTasks,
     state.origin,

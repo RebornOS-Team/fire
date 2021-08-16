@@ -1,5 +1,7 @@
 const {join} = require('path');
 const externals = require('./package.json').dependencies;
+const webpack = require('webpack');
+const {version} = require('./package.json');
 
 module.exports = {
   mode: process.env.NODE_ENV,
@@ -29,4 +31,9 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new webpack.EnvironmentPlugin({
+      VERSION: version,
+    }),
+  ],
 };

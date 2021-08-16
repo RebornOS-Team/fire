@@ -2425,10 +2425,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/prop-types@npm:*":
+  version: 15.7.4
+  resolution: "@types/prop-types@npm:15.7.4"
+  checksum: ef6e1899e59b876c273811b1bd845022fc66d5a3d11cb38a25b6c566b30514ae38fe20a40f67622f362a4f4f7f9224e22d8da101cff3d6e97e11d7b4c307cfc1
+  languageName: node
+  linkType: hard
+
 "@types/q@npm:^1.5.1":
   version: 1.5.5
   resolution: "@types/q@npm:1.5.5"
   checksum: 3bd386fb97a0e5f1ce1ed7a14e39b60e469b5ca9d920a7f69e0cdb58d22c0f5bdd16637d8c3a5bfeda76663c023564dd47a65389ee9aaabd65aee54803d5ba45
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:17.0.18":
+  version: 17.0.18
+  resolution: "@types/react@npm:17.0.18"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 0b3d5fe0466b57c5539169671e29c4bdad2e2cf5b3eea25d443845d0153b2ddfbe0ef6d017f2f0a7ae49732d6fd14db189f9578ba0629790b896abe3a3ee44f3
   languageName: node
   linkType: hard
 
@@ -2438,6 +2456,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: f241bb773ab14b14500623ac3b57c52006ce32b20426b6d8bf2fe5fdc0344f42c77ac0f94ff57b443ae1d320a1a86c62b4e47239f0321699404402fbeb24bad6
+  languageName: node
+  linkType: hard
+
+"@types/scheduler@npm:*":
+  version: 0.16.2
+  resolution: "@types/scheduler@npm:0.16.2"
+  checksum: b6b4dcfeae6deba2e06a70941860fb1435730576d3689225a421280b7742318d1548b3d22c1f66ab68e414f346a9542f29240bc955b6332c5b11e561077583bc
   languageName: node
   linkType: hard
 
@@ -12236,6 +12261,7 @@ fsevents@^1.2.7:
   resolution: "rebornos-fire-renderer@workspace:."
   dependencies:
     "@craco/craco": 6.2.0
+    "@types/react": 17.0.18
     eslint-plugin-react: 7.24.0
     eslint-plugin-react-hooks: 4.2.0
     react: 17.0.2
@@ -12243,6 +12269,7 @@ fsevents@^1.2.7:
     react-scripts: 4.0.3
     rsuite: 4.10.2
     xterm: 4.13.0
+    xterm-addon-web-links: 0.4.0
   languageName: unknown
   linkType: soft
 
@@ -15242,6 +15269,15 @@ resolve@^2.0.0-next.3:
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: ac5dfa738b21f6e7f0dd6e65e1b3155036d68104e67e5d5d1bde74892e327d7e5636a076f625599dc394330a731861e87343ff184b0047fef1360a7ec0a5a36a
+  languageName: node
+  linkType: hard
+
+"xterm-addon-web-links@npm:0.4.0":
+  version: 0.4.0
+  resolution: "xterm-addon-web-links@npm:0.4.0"
+  peerDependencies:
+    xterm: ^4.0.0
+  checksum: 7bcb489b2b406602a3aa4bde4394379e24820a9a25503e24e78fa5b9301b8aea64c7851c91d5b9d27784f7a5bd6da5d81588f149f5379641bf97857e65e1f2d0
   languageName: node
   linkType: hard
 
