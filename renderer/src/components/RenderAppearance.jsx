@@ -7,7 +7,6 @@ import {
   Navbar,
   Panel,
   Col,
-  Row,
   Divider,
   ButtonGroup,
   PanelGroup,
@@ -16,11 +15,10 @@ import React, {useState, useEffect} from 'react';
 import {execSync} from 'child_process';
 import {useGlobalStore} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
-import {RenderUnInstallation} from './RenderUnInstallation';
 
 /**
  * @function RenderAppearance
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering Appearance menu
@@ -182,14 +180,14 @@ export function RenderAppearance() {
   }, [scanPackages]);
   return (
     <>
-      <Row
+      <Panel
         style={{
           textAlign: 'center',
         }}
-      >
-        <Panel header={<h3>Appearance</h3>} bodyFill />
-      </Row>
-      <Navbar>
+        header={<h3>Appearance</h3>}
+        bodyFill
+      />
+      <Navbar appearance="subtle">
         <Navbar.Body>
           <Nav pullRight appearance="subtle" activeKey="1">
             <Nav.Item
@@ -339,7 +337,7 @@ export function RenderAppearance() {
                   status: true,
                   name: pkg.name,
                   deps: pkg.deps,
-                  goto: <RenderUnInstallation />,
+                  goto: <RenderInstallation />,
                   origin: <RenderAppearance />,
                   terminal: true,
                 });
@@ -388,7 +386,7 @@ export function RenderAppearance() {
                   status: true,
                   name: pkg.name,
                   deps: pkg.deps,
-                  goto: <RenderUnInstallation />,
+                  goto: <RenderInstallation />,
                   origin: <RenderAppearance />,
                   terminal: true,
                 });

@@ -1,11 +1,11 @@
 {
   "env": {
     "es2021": true,
-    "shared-node-browser": true
+    "shared-node-browser": true,
+    "browser": true
   },
   "extends": [
     "eslint:recommended",
-    "react-app",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "google",

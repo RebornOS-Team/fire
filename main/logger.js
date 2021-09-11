@@ -3,7 +3,7 @@ const {inspect} = require('util');
 
 module.exports = class Logger {
   /**
-   * @author SoulHarsh007 <harshtheking@hotmail.com>
+   * @author SoulHarsh007 <harsh.peshwani@outlook.com>
    * @copyright SoulHarsh007 2021
    * @since v1.0.0-rc-02
    * @param {string} [defaultMeta] - Make this logger a store only logger
@@ -72,10 +72,10 @@ module.exports = class Logger {
   get rawLogs() {
     const logs = this.logs;
     logs.unshift(
-      `========== RebornOS Fire v${process.env.VERSION} Log File ==========\n`
+      `========== RebornOS Fire v${process.env.VERSION} (${process.env.CODE_NAME}) Log File ==========\n`
     );
     logs.push(
-      `\n========== RebornOS Fire v${process.env.VERSION} Log File ==========\n`
+      `\n========== RebornOS Fire v${process.env.VERSION} (${process.env.CODE_NAME}) Log File ==========\n`
     );
     return logs.join('\n');
   }

@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const {version} = require('./package.json');
+const {version, codeName} = require('./package.json');
 
 module.exports = {
   webpack: {
@@ -7,12 +7,12 @@ module.exports = {
       add: [
         new webpack.EnvironmentPlugin({
           VERSION: version,
+          CODE_NAME: codeName,
         }),
       ],
     },
     configure: (webpackConfig, {env}) => {
       webpackConfig.target = 'electron-renderer';
-      delete webpackConfig.devtool;
       if (env === 'production') {
         const TerserPlugin = webpackConfig.optimization.minimizer.find(
           i => i.constructor.name === 'TerserPlugin'

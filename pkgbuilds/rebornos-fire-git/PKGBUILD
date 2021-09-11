@@ -1,7 +1,7 @@
-# Maintainer: SoulHarsh007 <harshtheking@hotmail.com>
+# Maintainer: SoulHarsh007 <harsh.peshwani@outlook.com>
 pkgname="rebornos-fire-git"
 _pkgname="rebornos-fire"
-pkgver=1.0.0.rc.2.c2527d4.git
+pkgver=1.0.0.rc.2.3a72031.git
 _pkgver=1.0.0
 pkgrel=1
 _pkg="linux-unpacked"

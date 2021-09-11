@@ -7,3 +7,4 @@ Icon=fire
 StartupWMClass=RebornOS Fire
 Comment=RebornOS Fire
 Categories=Utility;
+MimeType=x-scheme-handler/rebornos-fire;

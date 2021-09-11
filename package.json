@@ -2,11 +2,12 @@
   "name": "rebornos-fire",
   "description": "RebornOS Fire",
   "private": true,
-  "version": "1.0.0-rc-2",
+  "version": "1.0.0-rc.3",
+  "codeName": "Shiny Cat Bush",
   "packageManager": "yarn@3.0.0",
   "author": {
     "name": "SoulHarsh007",
-    "email": "harshtheking@hotmail.com"
+    "email": "harsh.peshwani@outlook.com"
   },
   "license": "GPL-3.0-or-later",
   "repository": {
@@ -42,18 +43,18 @@
   },
   "devDependencies": {
     "@types/bs58": "4.0.1",
-    "electron": "13.1.9",
+    "electron": "14.0.0",
     "electron-builder": "22.11.7",
     "eslint": "7.32.0",
     "eslint-config-google": "0.14.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-jsdoc": "36.0.7",
-    "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-jsdoc": "36.1.0",
+    "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-security": "1.4.0",
-    "node-gyp": "8.1.0",
+    "node-gyp": "8.2.0",
     "node-loader": "2.0.0",
-    "prettier": "2.3.2",
-    "webpack": "5.50.0",
+    "prettier": "2.4.0",
+    "webpack": "5.52.1",
     "webpack-cli": "4.8.0"
   },
   "build": {
@@ -65,9 +66,18 @@
       "./app",
       "package.json"
     ],
+    "protocols": [
+      {
+        "name": "RebornOS Fire",
+        "schemes": [
+          "rebornos-fire"
+        ]
+      }
+    ],
     "directories": {
       "buildResources": "resources"
     },
+    "compression": "maximum",
     "linux": {
       "target": "dir",
       "maintainer": "SoulHarsh007",
@@ -78,7 +88,8 @@
       "desktop": {
         "Name": "RebornOS Fire",
         "Type": "Application",
-        "Terminal": false
+        "Terminal": false,
+        "MimeType": "x-scheme-handler/rebornos-fire;"
       }
     }
   }

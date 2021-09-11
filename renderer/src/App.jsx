@@ -1,5 +1,5 @@
-import 'rsuite/dist/styles/rsuite-dark.min.css';
 import './css/global.css';
+import 'rsuite/dist/styles/rsuite-dark.css';
 import {ipcRenderer} from 'electron';
 import React, {useEffect} from 'react';
 import {useGlobalStore} from './utils/store';
@@ -13,7 +13,7 @@ import {
 
 /**
  * @function App
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @returns {any} main rendering component
@@ -23,6 +23,10 @@ export default function App() {
   useEffect(() => {
     ipcRenderer.send('StateChange', state.activeTasks);
   }, [state.activeTasks]);
+  useEffect(() => {
+    ipcRenderer.send('Loaded');
+    ipcRenderer.send('debug', 'Index page loaded');
+  }, []);
   return (
     <Container>
       <NetworkDetection />

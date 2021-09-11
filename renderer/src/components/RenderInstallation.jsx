@@ -6,7 +6,7 @@ import Terminal from './Terminal';
 
 /**
  * @function RenderInstallation
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering Active Installation
@@ -19,17 +19,41 @@ export function RenderInstallation() {
       return;
     }
     ipcRenderer.once('termExit', (_event, data) => {
-      new Notification(
-        `Installation ${
-          data.signal || data.exitCode ? 'failed' : 'completed'
-        }!`,
-        {
-          icon: '/icon.png',
-          body: `Installation ${
-            data.signal || data.exitCode ? 'failed' : 'completed'
-          } for: ${state.packageName}`,
-        }
-      );
+      const exitCode = data.signal || data.exitCode;
+      switch (state.activeTaskType) {
+        case 'installing':
+          new Notification(
+            `Installation ${exitCode ? 'failed' : 'completed'}!`,
+            {
+              icon: '/icon.png',
+              body: `Installation ${exitCode ? 'failed' : 'completed'} for: ${
+                state.packageName
+              }`,
+            }
+          );
+          break;
+        case 'un-installing':
+          new Notification(
+            `Un-Installation ${exitCode ? 'failed' : 'completed'}!`,
+            {
+              icon: '/icon.png',
+              body: `Un-Installation ${
+                exitCode ? 'failed' : 'completed'
+              } for: ${state.packageName}`,
+            }
+          );
+          break;
+        case 'enabling':
+          new Notification(`Enabling ${exitCode ? 'failed' : 'completed'}!`, {
+            icon: '/icon.png',
+            body: `Enabling ${exitCode ? 'failed' : 'completed'} for: ${
+              state.packageName
+            }`,
+          });
+          break;
+        default:
+          break;
+      }
       dispatch({
         type: 'InstallationUpdate',
         status: false,
@@ -46,17 +70,20 @@ export function RenderInstallation() {
     state.activeTasks,
     state.origin,
     dispatch,
+    state.activeTaskType,
   ]);
   return (
-    <Grid
-      fluid
-      style={{
-        textAlign: 'center',
-      }}
-    >
+    <Grid fluid>
       <Row>
         <Panel
-          header={<h3>You are installing: {state.packageName}</h3>}
+          style={{
+            textAlign: 'center',
+          }}
+          header={
+            <h3>
+              You are {state.activeTaskType}: {state.packageName}
+            </h3>
+          }
           bodyFill
         />
       </Row>

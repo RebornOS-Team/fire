@@ -1,4 +1,4 @@
-import {ipcRenderer, shell} from 'electron';
+import {ipcRenderer, shell, clipboard} from 'electron';
 import 'xterm/css/xterm.css';
 import React, {useEffect, useState} from 'react';
 import {Terminal} from 'xterm';
@@ -8,7 +8,7 @@ import {useGlobalStore} from '../utils/store';
 
 /**
  * @function RenderUtilities
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @param {{command: string[]}} _props - Component props
@@ -35,6 +35,7 @@ export default function TerminalComponent(_props) {
         shell.openExternal(url);
       })
     );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     terminal.open(document.getElementById('terminal'));
     terminal.onResize(resize =>
       ipcRenderer.send('termResize', resize.cols, resize.rows)
@@ -83,9 +84,12 @@ export default function TerminalComponent(_props) {
         return Alert.error(`Failed to create a paste`);
       }
       terminal.write(
-        `Paste created:\bURL: ${data.url}\nDeletion Token: ${data.deleteToken}`
+        `Paste created:\bURL: ${data.url}\nDeletion Token: ${data.deleteToken}\n`
       );
-      Alert.success(`Paste created!`);
+      clipboard.writeText(data.url);
+      Alert.success(
+        `Paste created successfully and link copied to clipboard!!`
+      );
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

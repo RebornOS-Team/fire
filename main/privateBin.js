@@ -6,7 +6,7 @@ const {ipcMain} = require('electron');
 /**
  * @function sendRequest
  * @description sends request to specified url with specified data
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @param {string} url - The url to send request at
@@ -29,7 +29,7 @@ const sendRequest = async (url, data) => {
 /**
  * @function
  * @description encrypts data before it's sent to privatebin instances
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @param {string} paste - The data to send / paste
@@ -82,13 +82,13 @@ module.exports = async paste => {
   };
   let res;
   try {
-    res = await sendRequest('https://bin.byreqz.de', requestData);
+    res = await sendRequest('https://paste.rebornos.org', requestData);
     if (res.data.status) {
       throw new Error(res.data.message);
     }
   } catch (e) {
     ipcMain.emit('log', (e, 'ERROR', 'PrivateBin'));
-    res = await sendRequest('https://bin.httpjames.space', requestData);
+    res = await sendRequest('https://bin.byreqz.de', requestData);
   }
   if (res.data.status) {
     return {

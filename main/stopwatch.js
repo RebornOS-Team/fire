@@ -3,7 +3,7 @@ const {performance} = require('perf_hooks');
 module.exports = class StopWatch {
   /**
    * @class StopWatch
-   * @author SoulHarsh007 <harshtheking@hotmail.com>
+   * @author SoulHarsh007 <harsh.peshwani@outlook.com>
    * @copyright SoulHarsh007 2021
    * @since v1.0.0-Pre-Alpha
    * @class StopWatch

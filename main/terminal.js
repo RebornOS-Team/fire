@@ -7,7 +7,7 @@ const Logger = require('./logger');
 
 module.exports = class TerminalManager {
   /**
-   * @author SoulHarsh007 <harshtheking@hotmail.com>
+   * @author SoulHarsh007 <harsh.peshwani@outlook.com>
    * @copyright SoulHarsh007 2021
    * @since v1.0.0-Pre-Alpha
    * @param {import('electron').BrowserWindow} mainWindow - Main renderer window

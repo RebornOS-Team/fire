@@ -91,14 +91,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@es-joy/jsdoccomment@npm:0.10.7":
-  version: 0.10.7
-  resolution: "@es-joy/jsdoccomment@npm:0.10.7"
+"@es-joy/jsdoccomment@npm:0.10.8":
+  version: 0.10.8
+  resolution: "@es-joy/jsdoccomment@npm:0.10.8"
   dependencies:
-    comment-parser: 1.2.3
+    comment-parser: 1.2.4
     esquery: ^1.4.0
     jsdoc-type-pratt-parser: 1.1.1
-  checksum: 073eb42cb5ed72d4b897cc5f23e19ef2aa3380c82a8ce1d97fbc0535617c7a1ea875da04c898e9b312b886f2425be92a7eeb5b4b6f059a3e938d40fd0b26c817
+  checksum: 3e144ef393459a541b64f6c9c8e62fb6d9b47e1a2c626410487ede12c472064f6ce6e0911df60b42ccf126d5a66102707eef59ca14767cb7aeb5e608b227558d
   languageName: node
   linkType: hard
 
@@ -1269,10 +1269,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"comment-parser@npm:1.2.3":
-  version: 1.2.3
-  resolution: "comment-parser@npm:1.2.3"
-  checksum: a9f25823ef2c1e9494bcb881d8650046490e92d4fe96db8ff1da60a7684e8737783675b78c723b7c99368ab0cc1e9df5f70ab830124fcf37632b1fa12f4ed575
+"comment-parser@npm:1.2.4":
+  version: 1.2.4
+  resolution: "comment-parser@npm:1.2.4"
+  checksum: 36ac280bce4c472fac22b3ec4d8aebb4d3d7c22c6808c70174f4deabee3b82144db66f8bd61eca9c514a6d0f12f6087ddab99e7d531e660d0da793b4730fd445
   languageName: node
   linkType: hard
 
@@ -1601,16 +1601,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:13.1.9":
-  version: 13.1.9
-  resolution: "electron@npm:13.1.9"
+"electron@npm:14.0.0":
+  version: 14.0.0
+  resolution: "electron@npm:14.0.0"
   dependencies:
     "@electron/get": ^1.0.1
     "@types/node": ^14.6.2
     extract-zip: ^1.0.3
   bin:
     electron: cli.js
-  checksum: 3748bb8f34c2c0926a5efdf77aa95d88b5e6ea967fe782bf767d7bf24849df9f050fbad482b7648373dc22f3894b992ef144d51da531495f741fbaf0fe945998
+  checksum: f07d52aab130ea596a295de0d1f620af73e0ce46462e5d73dc0f0e591daf92ef9c661e260ac00657e46d82e598758ad818a9d3eb3260968289bd44123119a1cf
   languageName: node
   linkType: hard
 
@@ -1764,12 +1764,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jsdoc@npm:36.0.7":
-  version: 36.0.7
-  resolution: "eslint-plugin-jsdoc@npm:36.0.7"
+"eslint-plugin-jsdoc@npm:36.1.0":
+  version: 36.1.0
+  resolution: "eslint-plugin-jsdoc@npm:36.1.0"
   dependencies:
-    "@es-joy/jsdoccomment": 0.10.7
-    comment-parser: 1.2.3
+    "@es-joy/jsdoccomment": 0.10.8
+    comment-parser: 1.2.4
     debug: ^4.3.2
     esquery: ^1.4.0
     jsdoc-type-pratt-parser: ^1.1.1
@@ -1779,22 +1779,22 @@ __metadata:
     spdx-expression-parse: ^3.0.1
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0
-  checksum: bc2bf61c5cda92f1881db36addb16cbbddedec9a6251e414583ccbdb982369485f3c8adbbed7f54152d1d3e26ec9b4cdc622c2011798ecca73c40b865e476f43
+  checksum: 5152a252a1c1fa8773a22aa0a69ab1c52a9334b12f0f3667548c6478d2d9acf970042b55ff2c48fa5165fab008cf20883f18a173fc5d6ba8f813074618b70ece
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:3.4.0":
-  version: 3.4.0
-  resolution: "eslint-plugin-prettier@npm:3.4.0"
+"eslint-plugin-prettier@npm:4.0.0":
+  version: 4.0.0
+  resolution: "eslint-plugin-prettier@npm:4.0.0"
   dependencies:
     prettier-linter-helpers: ^1.0.0
   peerDependencies:
-    eslint: ">=5.0.0"
-    prettier: ">=1.13.0"
+    eslint: ">=7.28.0"
+    prettier: ">=2.0.0"
   peerDependenciesMeta:
     eslint-config-prettier:
       optional: true
-  checksum: 30a07e8d12637d2988e371f6a20ff4c86fd7fdc3596d1d18d62c0367804f38e06a65052d0281234aeb2552e4d1908dcb2de20543413e038251a2717a46400a9d
+  checksum: 03d69177a3c21fa2229c7e427ce604429f0b20ab7f411e2e824912f572a207c7f5a41fd1f0a95b9b8afe121e291c1b1f1dc1d44c7aad4b0837487f9c19f5210d
   languageName: node
   linkType: hard
 
@@ -3210,7 +3210,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp@npm:8.1.0, node-gyp@npm:latest":
+"node-gyp@npm:8.2.0":
+  version: 8.2.0
+  resolution: "node-gyp@npm:8.2.0"
+  dependencies:
+    env-paths: ^2.2.0
+    glob: ^7.1.4
+    graceful-fs: ^4.2.6
+    make-fetch-happen: ^8.0.14
+    nopt: ^5.0.0
+    npmlog: ^4.1.2
+    rimraf: ^3.0.2
+    semver: ^7.3.5
+    tar: ^6.1.2
+    which: ^2.0.2
+  bin:
+    node-gyp: bin/node-gyp.js
+  checksum: 5e0e755eab8ca88647d20fc8aba4095560c3dd549686e86761b57b8489d93a1af68b0dccf881e5314bfce4d7ca290f8248e192915ccd3e18bf46571d72da6a9d
+  languageName: node
+  linkType: hard
+
+"node-gyp@npm:latest":
   version: 8.1.0
   resolution: "node-gyp@npm:8.1.0"
   dependencies:
@@ -3515,12 +3535,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.3.2":
-  version: 2.3.2
-  resolution: "prettier@npm:2.3.2"
+"prettier@npm:2.4.0":
+  version: 2.4.0
+  resolution: "prettier@npm:2.4.0"
   bin:
     prettier: bin-prettier.js
-  checksum: 17ce5784ac67621c292df58e2da60b2ee150c2d6aebea22a6ad9e52fcd6a5e66c349d0a8436ea3bd8ff9d778920a5f68000d7625b74f43558718a49755aa5259
+  checksum: ac1bf07566dad5f58469e6d8a954bd5c0f833935597deb00330e9f673e14e4cf81e07dee7eff5776c0edebe11358d199f332d9940be40c8b455516034e553ce0
   languageName: node
   linkType: hard
 
@@ -3646,20 +3666,20 @@ __metadata:
     "@nia3208/centra": 1.0.9-1
     "@types/bs58": 4.0.1
     bs58: 4.0.1
-    electron: 13.1.9
+    electron: 14.0.0
     electron-builder: 22.11.7
     electron-serve: 1.1.0
     eslint: 7.32.0
     eslint-config-google: 0.14.0
     eslint-config-prettier: 8.3.0
-    eslint-plugin-jsdoc: 36.0.7
-    eslint-plugin-prettier: 3.4.0
+    eslint-plugin-jsdoc: 36.1.0
+    eslint-plugin-prettier: 4.0.0
     eslint-plugin-security: 1.4.0
-    node-gyp: 8.1.0
+    node-gyp: 8.2.0
     node-loader: 2.0.0
     node-pty: 0.10.1
-    prettier: 2.3.2
-    webpack: 5.50.0
+    prettier: 2.4.0
+    webpack: 5.52.1
     webpack-cli: 4.8.0
   languageName: unknown
   linkType: soft
@@ -4266,6 +4286,20 @@ resolve@^1.9.0:
   languageName: node
   linkType: hard
 
+"tar@npm:^6.1.2":
+  version: 6.1.11
+  resolution: "tar@npm:6.1.11"
+  dependencies:
+    chownr: ^2.0.0
+    fs-minipass: ^2.0.0
+    minipass: ^3.0.0
+    minizlib: ^2.1.1
+    mkdirp: ^1.0.3
+    yallist: ^4.0.0
+  checksum: a04c07bb9e2d8f46776517d4618f2406fb977a74d914ad98b264fc3db0fe8224da5bec11e5f8902c5b9bcb8ace22d95fbe3c7b36b8593b7dfc8391a25898f32f
+  languageName: node
+  linkType: hard
+
 "temp-file@npm:^3.4.0":
   version: 3.4.0
   resolution: "temp-file@npm:3.4.0"
@@ -4566,9 +4600,9 @@ resolve@^1.9.0:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.50.0":
-  version: 5.50.0
-  resolution: "webpack@npm:5.50.0"
+"webpack@npm:5.52.1":
+  version: 5.52.1
+  resolution: "webpack@npm:5.52.1"
   dependencies:
     "@types/eslint-scope": ^3.7.0
     "@types/estree": ^0.0.50
@@ -4599,7 +4633,7 @@ resolve@^1.9.0:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 293bed1d9101ac127605f35a225a5cbc1bc89eac68d6e09e7feb3e284ec2693b3db7c1dd7710fadf6852f89ad39ed09413c35befa1cfc9738074b33299ac2b9e
+  checksum: 3a509d571ec7b7a1f21d364c7abbfa994bc0bd897bf57d690e56ad3a0b438e0065255ec92720d1839a8ea2ad526041306d0b0f7a7efaf8789f37d18b20cb20a3
   languageName: node
   linkType: hard
 

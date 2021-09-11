@@ -7,7 +7,6 @@ import {
   Navbar,
   Panel,
   Col,
-  Row,
   Divider,
   ButtonGroup,
   PanelGroup,
@@ -16,13 +15,11 @@ import React, {useState, useEffect} from 'react';
 import {execSync} from 'child_process';
 import {useGlobalStore} from '../utils/store';
 import {RenderInstallation} from './RenderInstallation';
-import {RenderUnInstallation} from './RenderUnInstallation';
-import {RenderEnable} from './RenderEnable';
 import {readlinkSync, existsSync} from 'fs';
 
 /**
  * @function RenderDMS
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering Display Managers
@@ -120,14 +117,14 @@ export function RenderDMS() {
   }, [scanPackages]);
   return (
     <>
-      <Row
+      <Panel
         style={{
           textAlign: 'center',
         }}
-      >
-        <Panel header={<h3>Display Managers</h3>} bodyFill />
-      </Row>
-      <Navbar>
+        header={<h3>Display Managers</h3>}
+        bodyFill
+      />
+      <Navbar appearance="subtle">
         <Navbar.Body>
           <Nav pullRight appearance="subtle" activeKey="1">
             <Nav.Item
@@ -296,7 +293,7 @@ export function RenderDMS() {
                           status: true,
                           name: pkg.name,
                           deps: pkg.deps,
-                          goto: <RenderUnInstallation />,
+                          goto: <RenderInstallation />,
                           origin: <RenderDMS />,
                           terminal: true,
                         },
@@ -307,7 +304,7 @@ export function RenderDMS() {
                       status: true,
                       name: pkg.name,
                       deps: pkg.deps,
-                      goto: <RenderUnInstallation />,
+                      goto: <RenderInstallation />,
                       origin: <RenderDMS />,
                       terminal: true,
                     });
@@ -342,7 +339,7 @@ export function RenderDMS() {
                             '-c',
                             `systemctl disable ${currentDM}.service && systemctl enable ${pkg.name.toLowerCase()}.service`,
                           ],
-                          goto: <RenderEnable />,
+                          goto: <RenderInstallation />,
                           origin: <RenderDMS />,
                           terminal: true,
                         },
@@ -357,7 +354,7 @@ export function RenderDMS() {
                         'enable',
                         `${pkg.name.toLowerCase()}.service`,
                       ],
-                      goto: <RenderEnable />,
+                      goto: <RenderInstallation />,
                       origin: <RenderDMS />,
                       terminal: true,
                     });
@@ -386,7 +383,7 @@ export function RenderDMS() {
                           'disable',
                           `${pkg.name.toLowerCase()}.service`,
                         ],
-                        goto: <RenderEnable />,
+                        goto: <RenderInstallation />,
                         origin: <RenderDMS />,
                         terminal: true,
                       },

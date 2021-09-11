@@ -10,6 +10,7 @@ const initialState = {
   packageName: '',
   packageDeps: [],
   terminal: true,
+  activeTaskType: 'install',
 };
 
 export const reducer = (state, action) => {
@@ -46,6 +47,21 @@ export const reducer = (state, action) => {
         ],
         content: action.goto,
         terminal: action.terminal,
+        activeTaskType: 'installing',
+      };
+    case 'VersionInstallationUpdate':
+      return {
+        ...state,
+        activeTasks: action.status,
+        packageName: action.name,
+        origin: action.origin,
+        packageDeps: [
+          ...['pacman', '-Uv', '--noconfirm', '--needed'],
+          ...action.deps,
+        ],
+        content: action.goto,
+        terminal: action.terminal,
+        activeTaskType: 'installing',
       };
     case 'UnInstallationUpdate':
       return {
@@ -56,6 +72,7 @@ export const reducer = (state, action) => {
         packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
         content: action.goto,
         terminal: action.terminal,
+        activeTaskType: 'un-installing',
       };
     case 'EnableUpdate':
       return {
@@ -66,6 +83,7 @@ export const reducer = (state, action) => {
         packageDeps: action.deps,
         content: action.goto,
         terminal: action.terminal,
+        activeTaskType: 'enabling',
       };
     default:
       return state;

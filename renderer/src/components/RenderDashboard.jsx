@@ -1,20 +1,11 @@
-import {
-  Panel,
-  Grid,
-  Row,
-  Divider,
-  Nav,
-  Navbar,
-  FlexboxGrid,
-  Icon,
-} from 'rsuite';
+import {Panel, Divider, Nav, Navbar, FlexboxGrid, Icon} from 'rsuite';
 import React, {useState, useEffect} from 'react';
 import {release, cpus, hostname, userInfo, freemem, totalmem} from 'os';
 import {readlinkSync, existsSync} from 'fs';
 
 /**
  * @function RenderDashboard
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering Dashboard
@@ -57,16 +48,15 @@ export function RenderDashboard() {
     }
   }, [reload]);
   return (
-    <Grid
-      fluid
-      style={{
-        textAlign: 'center',
-      }}
-    >
-      <Row>
-        <Panel header={<h3>Welcome to RebornOS Fire!</h3>} bodyFill></Panel>
-      </Row>
-      <Navbar>
+    <>
+      <Panel
+        style={{
+          textAlign: 'center',
+        }}
+        header={<h3>Welcome to RebornOS Fire!</h3>}
+        bodyFill
+      />
+      <Navbar appearance="subtle">
         <Navbar.Body>
           <Nav pullRight appearance="subtle" activeKey="1">
             <Nav.Item
@@ -91,15 +81,15 @@ export function RenderDashboard() {
         </Navbar.Body>
       </Navbar>
       <Divider />
-      <Row
+      <div
         style={{
           textAlign: 'center',
         }}
       >
         <h4>System Information:</h4>
-      </Row>
+      </div>
       <Divider />
-      <Row
+      <div
         style={{
           textAlign: 'center',
         }}
@@ -117,11 +107,11 @@ export function RenderDashboard() {
               <h4>{x.split('_').join(' ')}:</h4>
             </FlexboxGrid.Item>
             <FlexboxGrid.Item>
-              <h4>{sysInfo[x]}</h4>
+              <h4>{sysInfo[`${x}`]}</h4>
             </FlexboxGrid.Item>
           </FlexboxGrid>
         ))}
-      </Row>
-    </Grid>
+      </div>
+    </>
   );
 }

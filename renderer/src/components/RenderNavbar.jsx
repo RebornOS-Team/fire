@@ -4,7 +4,7 @@ import React from 'react';
 
 /**
  * @function RenderNavbar
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering Navbar
@@ -14,7 +14,7 @@ export function RenderNavbar() {
   const {dispatch} = useGlobalStore();
   return (
     <Header>
-      <Navbar>
+      <Navbar appearance="subtle">
         <Navbar.Body>
           <Nav pullRight>
             <Nav.Item

@@ -5,7 +5,7 @@ import {useGlobalStore} from '../utils/store';
 
 /**
  * @function RenderAbout
- * @author SoulHarsh007 <harshtheking@hotmail.com>
+ * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-Pre-Alpha
  * @description Used for rendering About software information
@@ -40,7 +40,7 @@ export function RenderAbout() {
           <h6>RebornOS Fire</h6>
           <br />
           <p>
-            v{process.env.VERSION}
+            v{process.env.VERSION} ({process.env.CODE_NAME})
             <br />
             System management utility for RebornOS
             <br />
