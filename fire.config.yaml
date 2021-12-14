@@ -1,0 +1,24 @@
+#  ____      _                       ___  ____    _____ _
+# |  _ \ ___| |__   ___  _ __ _ __  / _ \/ ___|  |  ___(_)_ __ ___
+# | |_) / _ \ '_ \ / _ \| '__| '_ \| | | \___ \  | |_  | | '__/ _ \
+# |  _ <  __/ |_) | (_) | |  | | | | |_| |___) | |  _| | | | |  __/
+# |_| \_\___|_.__/ \___/|_|  |_| |_|\___/|____/  |_|   |_|_|  \___|
+#
+# RebornOS Fire v1.0.0-rc.4 (Shiny Cat Bush) Configuration File
+
+# Private Bin Configuration
+privateBin:
+  # Request will be sent to this server first
+  # Type: String
+  # Default: https://paste.rebornos.org
+  primaryServer: https://paste.rebornos.org
+  # Request will be sent to this server if the primary one throws an error or is not available
+  # Type: String
+  # Default: https://bin.byreqz.de
+  fallbackServer: https://bin.byreqz.de
+
+# Logs Configuration
+logs:
+  # Type: String
+  # Default: /tmp
+  path: /tmp

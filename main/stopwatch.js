@@ -15,7 +15,7 @@ module.exports = class StopWatch {
   }
 
   /**
-   * @returns {number} - returns duration
+   * @returns {number} returns duration
    */
   get duration() {
     return this._end
@@ -24,7 +24,7 @@ module.exports = class StopWatch {
   }
 
   /**
-   * @returns {boolean} - returns true if running else false
+   * @returns {boolean} returns true if running else false
    */
   get running() {
     return !this._end;
@@ -32,7 +32,7 @@ module.exports = class StopWatch {
 
   /**
    * @function restart
-   * @returns {StopWatch} - returns restarted stopwatch instance
+   * @returns {StopWatch} returns restarted stopwatch instance
    */
   restart() {
     this._start = performance.now();
@@ -42,7 +42,7 @@ module.exports = class StopWatch {
 
   /**
    * @function reset
-   * @returns {StopWatch} - resets and returns stopwatch instance
+   * @returns {StopWatch} resets and returns stopwatch instance
    */
   reset() {
     this._start = performance.now();
@@ -52,7 +52,7 @@ module.exports = class StopWatch {
 
   /**
    * @function start
-   * @returns {StopWatch} - returns started stopwatch instance
+   * @returns {StopWatch} returns started stopwatch instance
    */
   start() {
     if (!this.running) {
@@ -64,7 +64,7 @@ module.exports = class StopWatch {
 
   /**
    * @function stop
-   * @returns {StopWatch} - returns stopped stopwatch instance
+   * @returns {StopWatch} returns stopped stopwatch instance
    */
   stop() {
     if (this.running) {
@@ -75,7 +75,7 @@ module.exports = class StopWatch {
 
   /**
    * @function toString
-   * @returns {string} - returns time elapsed in string format
+   * @returns {string} returns time elapsed in string format
    */
   toString() {
     if (this.duration >= 1000) {

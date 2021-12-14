@@ -1,7 +1,7 @@
 const {join} = require('path');
 const externals = require('./package.json').dependencies;
 const webpack = require('webpack');
-const {version, codeName} = require('./package.json');
+const env = require('./env');
 
 module.exports = {
   mode: process.env.NODE_ENV,
@@ -33,8 +33,9 @@ module.exports = {
   },
   plugins: [
     new webpack.EnvironmentPlugin({
-      VERSION: version,
-      CODE_NAME: codeName,
+      ...env,
+      NODE_OPTIONS:
+        '--max-old-space-size=1536 --enable-one-shot-optimization --expose-gc --gc-interval=100 --clear-free-memory',
     }),
   ],
 };

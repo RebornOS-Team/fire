@@ -6,7 +6,7 @@ import App from './App';
 ReactDOM.render(
   <React.StrictMode>
     <GlobalStore>
-      <App />
+      <App theme="dark" />
     </GlobalStore>
   </React.StrictMode>,
   document.getElementById('root')

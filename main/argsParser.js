@@ -1,4 +1,6 @@
 /* eslint-disable jsdoc/valid-types */
+const {options} = require('./constants');
+
 /**
  * @function argsParser
  * @author SoulHarsh007 <harsh.peshwani@outlook.com>
@@ -23,22 +25,33 @@ const argsParser = arg => {
  * @author SoulHarsh007 <harsh.peshwani@outlook.com>
  * @copyright SoulHarsh007 2021
  * @since v1.0.0-rc-02
- * @description Args parser
- * @returns {{[k: string]: string}} parsed args as object
+ * @description Args processor
+ * @returns {{[k: string]: string}} Parsed KeyValue args
  */
 const argsProcessor = () => {
-  const json = {};
-  process.argv
-    .slice(2)
+  const args = {};
+  const rawArgs = process.argv.slice(1);
+  rawArgs
+    .filter(x => !x.startsWith('rebornos-fire://'))
     .join(' ')
     // The regex is safe, and the warning is likely a false positive!
     // eslint-disable-next-line security/detect-unsafe-regex
     .match(/-{1,2}(([/-z]+)(\s|=|-)?)+/g)
     ?.forEach(x => {
-      const args = x.replace(/-(-)?/, '').trim().split(/\s|=/g);
-      json[args.shift()] = argsParser(args);
+      const argString = x.replace(/-(-)?/, '').trim().split(/\s|=/g);
+      const key = argString.shift();
+      const alias = options.find(cmd => cmd.aliases.includes(key));
+      if (alias) {
+        args[alias.name] = argsParser(argString);
+      } else {
+        // eslint-disable-next-line security/detect-object-injection
+        args[key] = argsParser(argString);
+      }
     });
-  return json;
+  if (rawArgs.join(' ').startsWith('rebornos-fire://')) {
+    args.page = rawArgs.join(' ').replace('rebornos-fire://', '');
+  }
+  return args;
 };
 
 module.exports = argsProcessor;

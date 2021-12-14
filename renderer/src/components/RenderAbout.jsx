@@ -1,5 +1,7 @@
 import React from 'react';
-import {Modal, FlexboxGrid, Button} from 'rsuite';
+import Modal from 'rsuite/Modal';
+import FlexboxGrid from 'rsuite/FlexboxGrid';
+import Button from 'rsuite/Button';
 import {shell} from 'electron';
 import {useGlobalStore} from '../utils/store';
 
@@ -11,14 +13,14 @@ import {useGlobalStore} from '../utils/store';
  * @description Used for rendering About software information
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderAbout() {
+export default function RenderAbout() {
   const {state, dispatch} = useGlobalStore();
   return (
     <FlexboxGrid align="middle" justify="center">
       <Modal
         size="xs"
-        show={state.showAboutModal}
-        onHide={() =>
+        open={state.showAboutModal}
+        onClose={() =>
           dispatch({
             type: 'AboutModal',
           })
@@ -31,7 +33,7 @@ export function RenderAbout() {
         <Modal.Body>
           <img
             className="rs-icon"
-            src="/rebornos-fire-new.svg"
+            src="/rebornos-fire.svg"
             height={128}
             width={128}
             alt=""

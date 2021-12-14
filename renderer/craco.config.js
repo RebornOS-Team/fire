@@ -1,13 +1,19 @@
 const webpack = require('webpack');
-const {version, codeName} = require('./package.json');
 
 module.exports = {
   webpack: {
     plugins: {
       add: [
         new webpack.EnvironmentPlugin({
-          VERSION: version,
-          CODE_NAME: codeName,
+          VERSION: process.env.VERSION,
+          CODE_NAME: process.env.CODE_NAME,
+          MODULES_KEY: process.env.MODULES_KEY,
+          FIRE_MODULES_SERVER: process.env.FIRE_MODULES_SERVER,
+          PUBLIC_KEY_X: process.env.PUBLIC_KEY_X,
+          PUBLIC_KEY_Y: process.env.PUBLIC_KEY_Y,
+          PUBLIC_KEY_KTY: process.env.PUBLIC_KEY_KTY,
+          PUBLIC_KEY_CRV: process.env.PUBLIC_KEY_CRV,
+          PUBLIC_KEY_ALG: process.env.PUBLIC_KEY_ALG,
         }),
       ],
     },

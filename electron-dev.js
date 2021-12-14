@@ -1,6 +1,7 @@
 // eslint-disable-next-line security/detect-child-process
 const {spawn} = require('child_process');
 const webpack = require('webpack');
+const addEnv = require('./env');
 
 let firstCompile = true;
 let mainProcess;
@@ -10,9 +11,9 @@ const startRendererProcess = () => {
     cwd: `${process.cwd()}/renderer`,
     detached: true,
     env: {
-      ...process.env,
       SKIP_PREFLIGHT_CHECK: true,
       BROWSER: 'none',
+      ...addEnv,
     },
   });
   rendererProcess.stdout.on('data', data =>
@@ -32,7 +33,7 @@ const startRendererProcess = () => {
 const startMainProcess = () => {
   mainProcess = spawn(
     'electron',
-    ['.', '--remote-debugging-port=5858', '--inspect=9292', '--debug'],
+    ['.', '--remote-debugging-port=5858', '--inspect=9292', '-d'],
     {
       detached: true,
       env: {

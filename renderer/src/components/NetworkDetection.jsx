@@ -1,6 +1,6 @@
 import {ipcRenderer} from 'electron';
 import React, {useEffect, useState} from 'react';
-import {Message} from 'rsuite';
+import Message from 'rsuite/Message';
 
 /**
  * @function NetworkDetection
@@ -10,28 +10,36 @@ import {Message} from 'rsuite';
  * @description Used for detecting network connection
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function NetworkDetection() {
+export default function NetworkDetection() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   useEffect(() => {
-    window.addEventListener('offline', () => {
+    const offline = () => {
       setIsOnline(false);
       ipcRenderer.send('debug', 'Network state changed: offline');
-    });
-    window.addEventListener('online', () => {
+    };
+    const online = () => {
       setIsOnline(true);
       ipcRenderer.send('debug', 'Network state changed: online');
-    });
+    };
+    window.addEventListener('offline', offline);
+    window.addEventListener('online', online);
+    return () => {
+      window.removeEventListener('online', online);
+      window.removeEventListener('offline', offline);
+    };
   }, []);
   return (
     <Message
       showIcon
       type="warning"
-      title="No Network"
-      description="No connectivity or limited network connectivity, Your installations might fail."
-      closable={true}
+      header="No Network"
+      closable
       style={{
-        display: isOnline ? 'none' : 'flex',
+        display: isOnline ? 'none' : 'inline-block',
       }}
-    />
+    >
+      No connectivity or limited network connectivity, Your installations might
+      fail.
+    </Message>
   );
 }

@@ -1,12 +1,13 @@
-import {Sidebar, Nav, Sidenav, Dropdown} from 'rsuite';
-import {
-  RenderAppearance,
-  RenderDMS,
-  RenderDashboard,
-  RenderTweaks,
-  RenderUtilities,
-  RenderKernels,
-} from '../components';
+import Sidebar from 'rsuite/Sidebar';
+import Nav from 'rsuite/Nav';
+import Sidenav from 'rsuite/Sidenav';
+import Dropdown from 'rsuite/Dropdown';
+import RenderAppearance from './RenderAppearance';
+import RenderDMS from './RenderDMS';
+import RenderDashboard from './RenderDashboard';
+import RenderTweaks from './RenderTweaks';
+import RenderUtilities from './RenderUtilities';
+import RenderKernels from './RenderKernels';
 import React, {useEffect, useState, useCallback} from 'react';
 import {useGlobalStore} from '../utils/store';
 import {ipcRenderer} from 'electron';
@@ -19,7 +20,7 @@ import {ipcRenderer} from 'electron';
  * @description Used for rendering Sidebar
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderSidebar() {
+export default function RenderSidebar() {
   const {state, dispatch} = useGlobalStore();
   const [activeKey, setActiveKey] = useState('1');
   const handleSelection = useCallback(
@@ -75,7 +76,9 @@ export function RenderSidebar() {
     [dispatch]
   );
   useEffect(() => {
-    ipcRenderer.once('Goto', (_event, page) => handleSelection(page));
+    const handler = (_, page) => handleSelection(page);
+    ipcRenderer.once('Goto', handler);
+    return ipcRenderer.removeListener('Goto', handler);
   }, [handleSelection]);
   return (
     <div
@@ -89,43 +92,9 @@ export function RenderSidebar() {
           flexDirection: 'column',
         }}
       >
-        <Sidenav
-          expanded={true}
-          activeKey={activeKey}
-          onSelect={handleSelection}
-          appearance="subtle"
-        >
-          <Sidenav.Header>
-            <div
-              style={{
-                padding: 18,
-                fontSize: 24,
-                height: 56,
-                color: '#fff',
-              }}
-            >
-              <i>
-                <img
-                  className="rs-icon rs-icon-size-3x"
-                  src="/rebornos-fire-new.svg"
-                  height={44}
-                  width={44}
-                  alt=""
-                />
-              </i>
-              <span
-                style={{
-                  marginLeft: 6,
-                  marginBottom: 10,
-                }}
-              >
-                {' RebornOS Fire'}
-              </span>
-            </div>
-          </Sidenav.Header>
-          <hr />
+        <Sidenav expanded appearance="subtle">
           <Sidenav.Body>
-            <Nav>
+            <Nav activeKey={activeKey} onSelect={handleSelection}>
               <Nav.Item eventKey="1" disabled={state.activeTasks}>
                 Dashboard
               </Nav.Item>
@@ -139,7 +108,16 @@ export function RenderSidebar() {
                 eventKey="4"
                 disabled={state.activeTasks}
                 title="Utilities"
-                onClick={() => handleSelection('4')}
+                onToggle={open => {
+                  if (!state.activeTasks && open) {
+                    handleSelection('4');
+                  }
+                }}
+                onSelect={e => {
+                  if (!state.activeTasks) {
+                    handleSelection(e);
+                  }
+                }}
               >
                 <Dropdown.Item eventKey="4-1" disabled={state.activeTasks}>
                   Office

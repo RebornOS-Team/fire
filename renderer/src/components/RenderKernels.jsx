@@ -1,24 +1,26 @@
+/* disabled as config defaults have strings and config cannot be updated
+ * by users manually (causes encryption removal and regenerates the config.
+ * encryption key is different for every build and it is not accessible by the user)
+ */
+/* eslint-disable security/detect-non-literal-regexp */
 /* Regex(s) used here are safe and this is a eslint plugin bug */
 /* eslint-disable security/detect-unsafe-regex */
-import {
-  Panel,
-  Divider,
-  Navbar,
-  Icon,
-  Nav,
-  Button,
-  PanelGroup,
-  FlexboxGrid,
-  Col,
-  Modal,
-  ButtonGroup,
-  SelectPicker,
-  Loader,
-} from 'rsuite';
+import Modal from 'rsuite/Modal';
+import FlexboxGrid from 'rsuite/FlexboxGrid';
+import Button from 'rsuite/Button';
+import Panel from 'rsuite/Panel';
+import Col from 'rsuite/Col';
+import Divider from 'rsuite/Divider';
+import ButtonGroup from 'rsuite/ButtonGroup';
+import PanelGroup from 'rsuite/PanelGroup';
+import Loader from 'rsuite/Loader';
+import SelectPicker from 'rsuite/SelectPicker';
 import React, {useState, useEffect, useCallback} from 'react';
-import {execSync} from 'child_process';
+import {execFileSync} from 'child_process';
 import {useGlobalStore} from '../utils/store';
-import {RenderInstallation} from './RenderInstallation';
+import ReloadBar from './ReloadBar';
+import RenderInstallation from './RenderInstallation';
+import modules from '../utils/modules';
 import {centra} from '@nia3208/centra';
 import {ipcRenderer} from 'electron';
 
@@ -30,7 +32,7 @@ import {ipcRenderer} from 'electron';
  * @description Used for rendering Utilities
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderKernels() {
+export default function RenderKernels() {
   const {dispatch} = useGlobalStore();
   const [scanPackages, setScanPackages] = useState(true);
   /**
@@ -42,43 +44,17 @@ export function RenderKernels() {
     loading: true,
     text: 'Reloading',
   });
-  const [packages, setPackages] = useState([
-    {
-      name: 'Linux',
-      description: 'The default Arch Linux kernel and modules',
-      installed: false,
-      package: /^linux$/gm,
-      deps: ['linux', 'linux-headers'],
-      match: /([0-9]{1,2}\.){2}([0-9]{1,3}\.)?arch[0-9]-[0-9]/g,
-    },
-    {
-      name: 'Linux LTS',
-      description: 'The LTS Linux kernel and modules',
-      installed: false,
-      package: /^linux-lts$/gm,
-      deps: ['linux-lts', 'linux-lts-headers'],
-      match: /([0-9]{1,2}\.){2}([0-9]{1,3})?-[0-9]/g,
-    },
-    {
-      name: 'Linux Zen',
-      description: 'The Linux ZEN kernel and modules',
-      installed: false,
-      package: /^linux-zen$/gm,
-      deps: ['linux-zen', 'linux-zen-headers'],
-      match: /([0-9]{1,2}\.){2}([0-9]{1,3}\.)?zen[0-9]-[0-9]/g,
-    },
-    {
-      name: 'Linux Hardened',
-      description: 'The Security-Hardened Linux kernel and modules',
-      installed: false,
-      package: /^linux-hardened$/gm,
-      deps: ['linux-hardened', 'linux-hardened-headers'],
-      match: /([0-9]{1,2}\.){2}([0-9]{1,3}\.)?(hardened[0-9]|a)-[0-9]/g,
-    },
-  ]);
-  const [versions, setVersions] = useState([
-    {
-      name: 'Linux',
+  const data = modules.get('kernels');
+  const [packages, setPackages] = useState(
+    data.map(x => {
+      x.package = new RegExp(x.package.source, x.package.flags);
+      x.match = new RegExp(x.match.source, x.match.flags);
+      return x;
+    })
+  );
+  const [versions, setVersions] = useState(
+    data.map(x => ({
+      name: x.name,
       versions: [
         {
           label: 'Latest',
@@ -86,56 +62,41 @@ export function RenderKernels() {
         },
       ],
       selected: 'Latest',
-    },
-    {
-      name: 'Linux LTS',
-      versions: [
-        {
-          label: 'Latest',
-          value: 'Latest',
-        },
-      ],
-      selected: 'Latest',
-    },
-    {
-      name: 'Linux Zen',
-      versions: [
-        {
-          label: 'Latest',
-          value: 'Latest',
-        },
-      ],
-      selected: 'Latest',
-    },
-    {
-      name: 'Linux Hardened',
-      versions: [
-        {
-          label: 'Latest',
-          value: 'Latest',
-        },
-      ],
-      selected: 'Latest',
-    },
-  ]);
+    }))
+  );
   const fetchVersions = useCallback(
     async id => {
-      if (versions.find(x => x.name === id.name).versions.length === 1) {
-        let data;
-        try {
-          data = await centra(
-            `https://archive.archlinux.org/packages/l/${id.deps[0]}/`,
-            'GET'
-          ).text();
-        } catch (error) {
-          ipcRenderer.send(
-            'debug',
-            error.stack ??
-              error.message ??
-              'Failed at fetching data, Error has no stack/message'
-          );
-        }
-        const version = data?.match(id.match);
+      if (versions.find(x => x.name === id.name).versions.length !== 1) {
+        return;
+      }
+      let info;
+      try {
+        info = await centra(
+          `https://asia.archive.pkgbuild.com/packages/l/${id.deps[0]}/`,
+          'GET'
+        ).text();
+      } catch (error) {
+        ipcRenderer.send('debug', error);
+      }
+      try {
+        const version = [];
+        info
+          ?.match(
+            new RegExp(
+              `${id.deps[0]}-${id.match.source}-x86_64.pkg.tar.(zst|xz)`,
+              'g'
+            )
+          )
+          ?.forEach(link => {
+            const name = link;
+            const match = name?.match(id.match);
+            if (match?.length && !version.find(x => x.label === match[0])) {
+              version.push({
+                label: match[0],
+                value: name.replace('.sig', ''),
+              });
+            }
+          });
         if (version?.length) {
           setVersions(x =>
             x.map(y => {
@@ -145,19 +106,21 @@ export function RenderKernels() {
                     label: 'Latest',
                     value: 'Latest',
                   },
-                  ...[...new Set(version)].map(y => ({label: y, value: y})),
+                  ...[...new Set(version)],
                 ];
               }
               return y;
             })
           );
         }
+      } catch (error) {
+        ipcRenderer.send('debug', error);
       }
     },
     [versions]
   );
   useEffect(() => {
-    const scanned = execSync('pacman -Qq').toString();
+    const scanned = execFileSync('pacman', ['-Qq']).toString();
     setPackages(x =>
       x.map(y =>
         scanned.match(y.package)?.length
@@ -185,31 +148,22 @@ export function RenderKernels() {
         header={<h3>Kernel Management</h3>}
         bodyFill
       />
-      <Navbar appearance="subtle">
-        <Navbar.Body>
-          <Nav pullRight appearance="subtle" activeKey="1">
-            <Nav.Item
-              icon={<Icon icon="refresh" pulse={refresh.loading} />}
-              eventKey="1"
-              onClick={() =>
-                setRefresh(x => {
-                  if (!x.loading) {
-                    setScanPackages(y => !y);
-                    return {
-                      loading: true,
-                      text: 'Reloading',
-                    };
-                  }
-                  return x;
-                })
-              }
-            >
-              {refresh.text}
-            </Nav.Item>
-          </Nav>
-        </Navbar.Body>
-      </Navbar>
-      <Divider />
+      <ReloadBar
+        action={() =>
+          setRefresh(x => {
+            if (!x.loading) {
+              setScanPackages(y => !y);
+              return {
+                loading: true,
+                text: 'Reloading',
+              };
+            }
+            return x;
+          })
+        }
+        pulseState={refresh.loading}
+        text={refresh.text}
+      />
       <PanelGroup>
         <FlexboxGrid
           justify="space-around"
@@ -219,9 +173,11 @@ export function RenderKernels() {
         >
           {packages.map((x, i) => {
             const versionData = versions.find(y => y.name === x.name);
+            const latestInstall =
+              x.installed && versionData.selected === 'Latest';
             return (
               <FlexboxGrid.Item
-                componentClass={Col}
+                as={Col}
                 colspan={28}
                 md={6}
                 key={i}
@@ -245,14 +201,11 @@ export function RenderKernels() {
                         setShowConfirmation(true);
                       }}
                       disabled={
-                        packages.filter(x => x.installed).length === 1 &&
-                        x.installed &&
-                        versionData.selected === 'Latest'
+                        packages.filter(y => y.installed).length === 1 &&
+                        latestInstall
                       }
                     >
-                      {x.installed && versionData.selected === 'Latest'
-                        ? 'Un-Install'
-                        : 'Install'}
+                      {latestInstall ? 'Un-Install' : 'Install'}
                     </Button>
                     <SelectPicker
                       onOpen={() => fetchVersions(x)}
@@ -281,7 +234,7 @@ export function RenderKernels() {
                       renderMenu={menu => {
                         if (versionData.versions.length === 1) {
                           return (
-                            <p
+                            <div
                               style={{
                                 padding: 4,
                                 color: '#999',
@@ -293,7 +246,7 @@ export function RenderKernels() {
                                 content="Fetching Versions..."
                                 vertical
                               />
-                            </p>
+                            </div>
                           );
                         }
                         return menu;
@@ -308,8 +261,8 @@ export function RenderKernels() {
       </PanelGroup>
       <Modal
         size="xs"
-        show={showConfirmation}
-        onHide={() => setShowConfirmation(false)}
+        open={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
         backdrop="static"
         keyboard={false}
         style={{
@@ -330,7 +283,13 @@ export function RenderKernels() {
             <Button
               onClick={() => {
                 setShowConfirmation(false);
-                const {selected} = versions.find(x => x.name === pkg.name);
+                const {selected, versions: v} = versions.find(
+                  x => x.name === pkg.name
+                );
+                console.log(
+                  selected,
+                  v.find(x => x.value === selected)
+                );
                 if (!pkg.installed && selected === 'Latest') {
                   dispatch({
                     type: 'InstallationUpdate',
@@ -356,7 +315,7 @@ export function RenderKernels() {
                     origin: <RenderKernels />,
                     terminal: true,
                   });
-                  new Notification('Un-Installation Started!', {
+                  return new Notification('Un-Installation Started!', {
                     icon: '/icon.png',
                     body: `Un-Installation started for: ${pkg.name}`,
                   });
@@ -365,10 +324,13 @@ export function RenderKernels() {
                   type: 'VersionInstallationUpdate',
                   status: true,
                   name: pkg.name,
-                  deps: pkg.deps.map(
-                    x =>
-                      `https://archive.archlinux.org/packages/l/${x}/${x}-${selected}-x86_64.pkg.tar.xz`
-                  ),
+                  deps: [
+                    `https://asia.archive.pkgbuild.com/packages/l/${pkg.deps[0]}/${selected}`,
+                    `https://asia.archive.pkgbuild.com/packages/l/${pkg.deps[0]}/${selected}`.replaceAll(
+                      pkg.deps[0],
+                      pkg.deps[1]
+                    ),
+                  ],
                   goto: <RenderInstallation />,
                   origin: <RenderKernels />,
                   terminal: true,

@@ -1,7 +1,8 @@
 # Maintainer: SoulHarsh007 <harsh.peshwani@outlook.com>
-pkgname="rebornos-fire-git"
+
+pkgname="rebornos-fire"
 _pkgname="rebornos-fire"
-pkgver=1.0.0.rc.2.3a72031.git
+pkgver=1.0.0.rc.3
 _pkgver=1.0.0
 pkgrel=1
 _pkg="linux-unpacked"
@@ -14,11 +15,11 @@ depends=('libnotify' 'polkit')
 source=("git+https://gitlab.com/rebornos-team/applications/fire")
 sha256sums=('SKIP')
 provides=("rebornos-fire")
-conflicts=("rebornos-fire")
+replaces=("rebornos-fire-git")
 
 pkgver() {
   cd fire
-  _ver="$(cat ./package.json | sed -En "s/  \"version\": \"(.*)\",/\1/p").$(git rev-parse --short HEAD).git"
+  _ver="$(cat ./package.json | sed -En "s/  \"version\": \"(.*)\",/\1/p")"
   echo "${_ver//-/.}"
 }
 
@@ -41,7 +42,9 @@ package() {
   install -d "${pkgdir}/usr/share/pixmaps"
   install -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
   install -m644 "fire.svg" "${pkgdir}/usr/share/pixmaps/fire.svg"
+  install -m644 "fire.svg" "${pkgdir}/usr/share/icons/fire.svg"
   install -m644 "fire.desktop" "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+  install -m644 "${srcdir}/kernelmanager.desktop" "${pkgdir}/usr/share/applications/kernelmanager.desktop"
   cp -r "dist/${_pkg}/"* "${pkgdir}/opt/${_pkgname}" -R
-  ln -s /opt/${_pkgname}/fire "${pkgdir}"/usr/bin/rebornos-fire
+  ln -s /opt/${_pkgname}/fire "${pkgdir}"/usr/bin/${_pkgname}
 }

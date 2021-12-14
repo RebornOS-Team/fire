@@ -1,43 +1,35 @@
 const {ipcMain} = require('electron');
-const terminal = require('node-pty');
-const StopWatch = require('./stopwatch');
-const {writeFile} = require('fs/promises');
 const privateBin = require('./privateBin');
 const Logger = require('./logger');
+const LocalTerminalManager = require('./localTerminal');
 
-module.exports = class TerminalManager {
+module.exports = class TerminalManager extends LocalTerminalManager {
   /**
    * @author SoulHarsh007 <harsh.peshwani@outlook.com>
+   * @augments LocalTerminalManager
    * @copyright SoulHarsh007 2021
    * @since v1.0.0-Pre-Alpha
-   * @param {import('electron').BrowserWindow} mainWindow - Main renderer window
+   * @param {import('electron').WebContents} webContents - webContents of the renderer window
    * @param {string} pkg - Name of package being installed
    * @param {string[]} command - Command to execute
+   * @param {Logger} mainProcessLogger - logger of main process, for shared log generation
    */
-  constructor(mainWindow, pkg, command) {
-    this.mainWindow = mainWindow;
-    this.startTs = new Date();
-    this.stopwatch = new StopWatch();
-    /**
-     * @type {import('node-pty').IPty}
-     * @description this jsdoc is a workaround to provide autocompletion for a spawned process without spawning it
-     */
-    this.terminal = terminal;
-    this.logger = new Logger('RebornOS Fire Main');
-    this.pkg = pkg;
-    this.command = command;
+  constructor(webContents, pkg, command, mainProcessLogger) {
+    super(pkg, command, mainProcessLogger);
+    this.webContents = webContents;
   }
 
   /**
    * @function handleCommandExecution
    * @description handles command execution
+   * @override
    */
   handleCommandExecution() {
     this.removeAllListeners();
     this.log(`Package Working On: ${this.pkg}`, 'INFO');
     this.log(`Command Executed: ${this.command.join(' ')}`, 'INFO');
     this.log(`Start TimeStamp: ${this.startTs}`, 'INFO');
-    this.mainWindow.webContents.send('termData', '\x1bc');
+    this.webContents.send('termData', '\x1bc');
     this.terminal = this.terminal.spawn('pkexec', this.command, {
       name: 'xterm-color',
       env: process.env,
@@ -50,20 +42,23 @@ module.exports = class TerminalManager {
       }`,
       'INFO'
     );
-    this.mainWindow.webContents.send(
+    this.webContents.send(
       'termData',
       `Process spawned with command: pkexec ${this.command.join(' ')}, PID: ${
         this.terminal.pid
       }\n`
     );
     this.stopwatch.start();
+    ipcMain.on('termInput', (_, input) => {
+      this.terminal.write(`${input}\r`);
+    });
     this.terminal.onData(data => {
-      this.mainWindow.webContents.send('termData', data);
+      this.webContents.send('termData', data);
       this.log(data, 'INFO', this.terminal.process);
     });
     this.terminal.onExit(data => {
       this.stopwatch.stop();
-      this.mainWindow.webContents.send('termExit', {
+      this.webContents.send('termExit', {
         ...data,
         time: this.stopwatch.toString(),
       });
@@ -83,50 +78,40 @@ module.exports = class TerminalManager {
   }
 
   /**
-   * @function log
-   * @param {string} [data] - log format param [date time `${meta}`] [`${type}`] - `${data}`
-   * @param {string} [type] - log format param [date time `${meta}`] [`${type}`] - `${data}`
-   * @param {any} [meta] - log format param [date time `${meta}`] [`${type}`] - `${data}`
-   * @description wrapper around <Logger>.log. logs data in main process console and stores it
-   */
-  log(data, type, meta) {
-    this.logger.log(data, type, meta, true);
-    ipcMain.emit('log', {}, data, type, meta);
-  }
-
-  /**
    * @function generateLogs
    * @description generates log file and stores it to /tmp/RebornOS Fire <PKG NAME> <START TS>.log
+   * @override
    */
   generateLogs() {
-    const fileName = `/tmp/RebornOS Fire ${this.pkg} ${this.startTs
-      .toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-      })
-      .replace(/,/g, '')}.log`;
-    writeFile(fileName, this.logger.rawLogs)
-      .then(() => this.mainWindow.webContents.send('logsGenerated', fileName))
-      .catch(e => this.mainWindow.webContents.send('logsError', e.stack || e));
+    super.generateLogs();
+    this.logger
+      .generateLogFile(
+        `${this.pkg} ${this.startTs
+          .toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+          })
+          .replace(/,/g, '')}`
+      )
+      .then(fileName => this.webContents.send('logsGenerated', fileName))
+      .catch(e => this.webContents.send('logsError', e.stack ?? e));
   }
 
   /**
    * @async
    * @function privateBin
-   * @returns {void}
+   * @returns {Promise<void>}
+   * @override
    */
   async privateBin() {
-    const data = await privateBin(this.logger.rawLogs);
-    if (data.message) {
-      return this.mainWindow.webContents.send('privateBinRes', {
-        error: data.message,
-      });
-    }
-    this.mainWindow.webContents.send('privateBinRes', data);
+    return this.webContents.send(
+      'privateBinRes',
+      await privateBin(this.logger.rawLogs, (...args) => this.log(...args))
+    );
   }
 
   /**

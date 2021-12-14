@@ -1,20 +1,18 @@
-import {
-  Nav,
-  Icon,
-  Modal,
-  FlexboxGrid,
-  Button,
-  Navbar,
-  Panel,
-  Col,
-  Divider,
-  ButtonGroup,
-  PanelGroup,
-} from 'rsuite';
+import Modal from 'rsuite/Modal';
+import FlexboxGrid from 'rsuite/FlexboxGrid';
+import Button from 'rsuite/Button';
+import Panel from 'rsuite/Panel';
+import Col from 'rsuite/Col';
+import Divider from 'rsuite/Divider';
+import ButtonGroup from 'rsuite/ButtonGroup';
+import PanelGroup from 'rsuite/PanelGroup';
+import LegacyWarningIcon from '@rsuite/icons/legacy/Warning';
 import React, {useState, useEffect} from 'react';
-import {execSync} from 'child_process';
 import {useGlobalStore} from '../utils/store';
-import {RenderInstallation} from './RenderInstallation';
+import RenderInstallation from './RenderInstallation';
+import ReloadBar from './ReloadBar';
+import modules from '../utils/modules';
+import {execFileSync} from 'child_process';
 
 /**
  * @function RenderAppearance
@@ -24,7 +22,7 @@ import {RenderInstallation} from './RenderInstallation';
  * @description Used for rendering Appearance menu
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderAppearance() {
+export default function RenderAppearance() {
   const {dispatch} = useGlobalStore();
   const [scanPackages, setScanPackages] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -39,127 +37,19 @@ export function RenderAppearance() {
     loading: true,
     text: 'Reloading',
   });
-  const [packages, setPackages] = useState([
-    {
-      name: 'Openbox',
-      description:
-        'Openbox is a highly configurable window manager. It is known for its minimalistic appearance and its flexibility. It is the most lightweight graphical option offered by RebornOS. Please Note: Openbox is not recommended for users who are new to Linux.',
-      image: '/openbox.webp',
-      installed: false,
-      package: /(openbox)/g,
-      deps: ['rebornos-cosmic-openbox'],
-    },
-    {
-      name: 'i3',
-      description:
-        'i3 is a tiling window manager, completely written from scratch. i3 is primarily targeted at advanced users and developers. Target platforms are GNU/Linux and BSD operating systems',
-      image: '/i3.webp',
-      installed: false,
-      package: /i3-(gaps|wm|git)(-(next|iconpatch))?(-git)?/g,
-      deps: ['rebornos-cosmic-i3'],
-    },
-    {
-      name: 'Budgie',
-      description:
-        'Budgie is the flagship desktop of Solus and is a Solus project. It focuses on simplicity and elegance. Written from scratch with integration in mind, the Budgie desktop tightly integrates with the GNOME stack, but offers an alternative desktop experience.',
-      image: '/budgie.webp',
-      installed: false,
-      package: /(budgie-desktop)(-git)?/g,
-      deps: ['rebornos-cosmic-budgie'],
-    },
-    {
-      name: 'Cinnamon',
-      description:
-        'Cinnamon is a Linux desktop which provides advanced, innovative features and a traditional desktop user experience. Cinnamon aims to make users feel at home by providing them with an easy-to-use and comfortable desktop experience.',
-      image: '/cinnamon.webp',
-      installed: false,
-      package: /(cinnamon)(-git)?/g,
-      deps: ['rebornos-cosmic-cinnamon'],
-    },
-    {
-      name: 'Deepin',
-      description:
-        'IMPORTANT: Keep in mind that the Deepin desktop can often be unstable. This does not depend on us, but on the developers of Deepin who usually upload BETA versions of the desktop or some components in the stable repositories of Arch Linux.',
-      image: '/deepin.webp',
-      installed: false,
-      package: /(deepin-desktop-base)(-git)?/g,
-      deps: ['rebornos-cosmic-deepin'],
-    },
-    {
-      name: 'Enlightenment',
-      description:
-        'Enlightenment is not just a window manager for Linux/X11 and others, but also a whole suite of libraries to help you create beautiful user interfaces with much less work\n',
-      image: '/enlightenment.webp',
-      installed: false,
-      package: /(enlightenment)(-git)?/g,
-      deps: ['rebornos-cosmic-enlightenment'],
-    },
-    {
-      name: 'GNOME',
-      description:
-        'GNOME is an easy and elegant way to use your computer. It features the Activities Overview which is an easy way to access all your basic tasks.',
-      image: '/gnome.webp',
-      installed: false,
-      package: /(gnome-shell)(-git)?/g,
-      deps: ['rebornos-cosmic-gnome'],
-    },
-    {
-      name: 'KDE Plasma',
-      description:
-        "If you are looking for a familiar working environment, KDE's Plasma Desktop offers all the tools required for a modern desktop computing experience so you can be productive right from the start.",
-      image: '/kde.webp',
-      installed: false,
-      package: /(plasma-desktop)(-git)?/g,
-      deps: ['rebornos-cosmic-kde'],
-    },
-    {
-      name: 'LXQt',
-      description:
-        'LXQt is the next-generation of LXDE, the Lightweight Desktop Environment. It is lightweight, modular, blazing-fast, and user-friendly.',
-      image: '/lxqt.webp',
-      installed: false,
-      package: /(lxqt-config)(-git)?/g,
-      deps: ['rebornos-cosmic-lxqt'],
-    },
-    {
-      name: 'MATE',
-      description:
-        'MATE is an intuitive, attractive, and lightweight desktop environment which provides a more traditional desktop experience. Accelerated compositing is supported, but not required to run MATE making it suitable for lower-end hardware.',
-      image: '/mate.webp',
-      installed: false,
-      package: /(mate-panel)(-git)?/g,
-      deps: ['rebornos-cosmic-mate'],
-    },
-    {
-      name: 'XFCE',
-      description:
-        'Xfce is a lightweight desktop environment. It aims to be fast and low on system resources, while remaining visually appealing and user friendly. It suitable for use on older computers and those with lower-end hardware specifications.',
-      image: '/xfce.webp',
-      installed: false,
-      package: /(xfce4-session)(-(git|devel|gtk2))?/g,
-      deps: ['rebornos-cosmic-xfce'],
-    },
-    {
-      name: 'UKUI',
-      description:
-        'UKUI is simple and intuitive interface adapted to the habit of users. Files category speed up file search. Favorite apps shortcut makes starting up application more convenient. User management makes a more concise and friendly interaction for system.',
-      image: '/ukui.webp',
-      installed: false,
-      package: /(ukui-session-manager)/g,
-      deps: ['rebornos-cosmic-ukui'],
-    },
-    {
-      name: 'LXDE',
-      description:
-        'LXDE, which stands for Lightweight X11 Desktop Environment, is a desktop environment which is lightweight and fast. It is designed to be user friendly and slim, while keeping the resource usage low. LXDE uses less RAM and less CPU while being a feature rich desktop environment.',
-      image: '/lxde.webp',
-      installed: false,
-      package: /(lxde-common)/g,
-      deps: ['rebornos-cosmic-lxde'],
-    },
-  ]);
+  const [packages, setPackages] = useState(
+    modules.get('appearance').map(x => {
+      /* disabled as config defaults have strings and config cannot be updated
+       * by users manually (causes encryption removal and regenerates the config.
+       * encryption key is different for every build and it is not accessible by the user)
+       */
+      // eslint-disable-next-line security/detect-non-literal-regexp
+      x.package = new RegExp(x.package.source, x.package.flags);
+      return x;
+    })
+  );
   useEffect(() => {
-    const scanned = execSync('pacman -Qq').toString();
+    const scanned = execFileSync('pacman', ['-Qq']).toString();
     setPackages(x =>
       x.map(y =>
         scanned.match(y.package)?.length
@@ -187,31 +77,22 @@ export function RenderAppearance() {
         header={<h3>Appearance</h3>}
         bodyFill
       />
-      <Navbar appearance="subtle">
-        <Navbar.Body>
-          <Nav pullRight appearance="subtle" activeKey="1">
-            <Nav.Item
-              icon={<Icon icon="refresh" pulse={refresh.loading} />}
-              eventKey="1"
-              onClick={() =>
-                setRefresh(x => {
-                  if (!x.loading) {
-                    setScanPackages(y => !y);
-                    return {
-                      loading: true,
-                      text: 'Reloading',
-                    };
-                  }
-                  return x;
-                })
-              }
-            >
-              {refresh.text}
-            </Nav.Item>
-          </Nav>
-        </Navbar.Body>
-      </Navbar>
-      <Divider />
+      <ReloadBar
+        action={() =>
+          setRefresh(x => {
+            if (!x.loading) {
+              setScanPackages(y => !y);
+              return {
+                loading: true,
+                text: 'Reloading',
+              };
+            }
+            return x;
+          })
+        }
+        pulseState={refresh.loading}
+        text={refresh.text}
+      />
       <PanelGroup>
         <FlexboxGrid
           justify="space-around"
@@ -221,7 +102,7 @@ export function RenderAppearance() {
         >
           {packages.map((x, i) => (
             <FlexboxGrid.Item
-              componentClass={Col}
+              as={Col}
               colspan={28}
               md={6}
               key={i}
@@ -296,8 +177,8 @@ export function RenderAppearance() {
       </PanelGroup>
       <Modal
         size="xs"
-        show={showConfirmation}
-        onHide={() => setShowConfirmation(false)}
+        open={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
         backdrop="static"
         keyboard={false}
         style={{
@@ -341,7 +222,7 @@ export function RenderAppearance() {
                   origin: <RenderAppearance />,
                   terminal: true,
                 });
-                new Notification('Un-Installation Started!', {
+                return new Notification('Un-Installation Started!', {
                   icon: '/icon.png',
                   body: `Un-Installation started for: ${pkg.name}`,
                 });
@@ -361,8 +242,8 @@ export function RenderAppearance() {
       </Modal>
       <Modal
         size="xs"
-        show={showLastConfirmation}
-        onHide={() => setShowLastConfirmation(false)}
+        open={showLastConfirmation}
+        onClose={() => setShowLastConfirmation(false)}
         backdrop="static"
         keyboard={false}
         style={{
@@ -370,7 +251,7 @@ export function RenderAppearance() {
         }}
       >
         <Modal.Header closeButton={false}>
-          <Icon icon="warning" /> Warning: Last DE detected
+          <LegacyWarningIcon /> Warning: Last DE detected
         </Modal.Header>
         <Modal.Body>
           Warning: If you un-install {pkg.name}, you will be left with no
@@ -390,7 +271,7 @@ export function RenderAppearance() {
                   origin: <RenderAppearance />,
                   terminal: true,
                 });
-                new Notification('Un-Installation Started!', {
+                return new Notification('Un-Installation Started!', {
                   icon: '/icon.png',
                   body: `Un-Installation started for: ${pkg.name}`,
                 });
@@ -411,11 +292,11 @@ export function RenderAppearance() {
       <Modal
         overflow={false}
         full
-        show={img.show}
+        open={img.show}
         style={{
           textAlign: 'center',
         }}
-        onHide={() =>
+        onClose={() =>
           setImg(x => {
             return {
               show: false,

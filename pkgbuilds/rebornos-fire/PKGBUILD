@@ -13,6 +13,7 @@ makedepends=('yarn')
 depends=('libnotify' 'polkit')
 source=(
   "fire.desktop"
+  "kernelmanager.desktop"
   "LICENSE"
   "fire.svg"
   "$pkgname-$_pkgver.tar.gz::https://github.com/RebornOS-Team/fire/releases/download/v$_pkgver/rebornos-fire-$_pkgver.tar.gz"
@@ -22,6 +23,7 @@ conflicts=("rebornos-fire-git")
 noextract=("$pkgname-$_pkgver.tar.gz")
 sha256sums=(
   'ea20e3b8bde64a4e5befbfaadda50bcf38a90ebaa9d863bb5e348ae75cfdf1c5'
+  '1398d69743fbc4ebebe0111dfe07daa86649d2eb98ccbbb66cd7a0aa5deaa1ae'
   '4257c04bf65197b0282d1a0105d01d9b273153f7dee1588bdf52dc9071618de7'
   '5f0db1f929b6b76a5291ea1b90c4307d30b7e8605ab56d267790214291640c05'
   'a566df7c3b93b0e8db6540f9704f6871a83af243653e970e30848a676f6884b4'
@@ -43,6 +45,7 @@ package() {
   install -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
   install -m644 "${srcdir}/fire.svg" "${pkgdir}/usr/share/pixmaps/fire.svg"
   install -m644 "${srcdir}/fire.desktop" "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+  install -m644 "${srcdir}/kernelmanager.desktop" "${pkgdir}/usr/share/applications/kernelmanager.desktop"
   cp -r "./${_pkg}/"* "${pkgdir}/opt/${_pkgname}" -R
   ln -s /opt/${_pkgname}/fire "${pkgdir}"/usr/bin/rebornos-fire
 }

@@ -1,5 +1,8 @@
 import {ipcRenderer} from 'electron';
-import {Panel, Grid, Col, Row, Divider} from 'rsuite';
+import Panel from 'rsuite/Panel';
+import Divider from 'rsuite/Divider';
+import Grid from 'rsuite/Grid';
+import Row from 'rsuite/Row';
 import React, {useEffect} from 'react';
 import {useGlobalStore} from '../utils/store';
 import Terminal from './Terminal';
@@ -12,58 +15,43 @@ import Terminal from './Terminal';
  * @description Used for rendering Active Installation
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderInstallation() {
+export default function RenderInstallation() {
   const {state, dispatch} = useGlobalStore();
   useEffect(() => {
-    if (!state.activeTasks) {
-      return;
-    }
-    ipcRenderer.once('termExit', (_event, data) => {
-      const exitCode = data.signal || data.exitCode;
-      switch (state.activeTaskType) {
-        case 'installing':
-          new Notification(
-            `Installation ${exitCode ? 'failed' : 'completed'}!`,
-            {
+    if (state.activeTasks) {
+      ipcRenderer.once('termExit', (_, data) => {
+        const exitCode = data.signal || data.exitCode;
+        const status = exitCode ? 'failed' : 'completed';
+        dispatch({
+          type: 'InstallationUpdate',
+          status: false,
+          deps: [],
+          name: state.packageName,
+          goto: <RenderInstallation />,
+          origin: state.origin,
+          terminal: true,
+        });
+        switch (state.activeTaskType) {
+          case 'installing':
+            return new Notification(`Installation ${status}!`, {
               icon: '/icon.png',
-              body: `Installation ${exitCode ? 'failed' : 'completed'} for: ${
-                state.packageName
-              }`,
-            }
-          );
-          break;
-        case 'un-installing':
-          new Notification(
-            `Un-Installation ${exitCode ? 'failed' : 'completed'}!`,
-            {
+              body: `Installation ${status} for: ${state.packageName}`,
+            });
+          case 'un-installing':
+            return new Notification(`Un-Installation ${status}!`, {
               icon: '/icon.png',
-              body: `Un-Installation ${
-                exitCode ? 'failed' : 'completed'
-              } for: ${state.packageName}`,
-            }
-          );
-          break;
-        case 'enabling':
-          new Notification(`Enabling ${exitCode ? 'failed' : 'completed'}!`, {
-            icon: '/icon.png',
-            body: `Enabling ${exitCode ? 'failed' : 'completed'} for: ${
-              state.packageName
-            }`,
-          });
-          break;
-        default:
-          break;
-      }
-      dispatch({
-        type: 'InstallationUpdate',
-        status: false,
-        deps: [],
-        name: state.packageName,
-        goto: <RenderInstallation />,
-        origin: state.origin,
-        terminal: true,
+              body: `Un-Installation ${status} for: ${state.packageName}`,
+            });
+          case 'enabling':
+            return new Notification(`Enabling ${status}!`, {
+              icon: '/icon.png',
+              body: `Enabling ${status} for: ${state.packageName}`,
+            });
+          default:
+            return;
+        }
       });
-    });
+    }
   }, [
     state.packageDeps,
     state.packageName,
@@ -89,9 +77,7 @@ export function RenderInstallation() {
       </Row>
       <Divider />
       <Row>
-        <Col>
-          <Terminal />
-        </Col>
+        <Terminal />
         <Divider />
       </Row>
     </Grid>

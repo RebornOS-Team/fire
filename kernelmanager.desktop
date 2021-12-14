@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=RebornOS Fire - Kernel Manager
+Exec="/opt/rebornos-fire/fire --page kernel management" %U
+Terminal=false
+Type=Application
+Icon=fire
+StartupWMClass=RebornOS Fire
+Comment=RebornOS Fire
+Categories=Utility;

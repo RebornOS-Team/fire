@@ -1,15 +1,19 @@
 import './css/global.css';
-import 'rsuite/dist/styles/rsuite-dark.css';
+import 'rsuite/dist/rsuite.min.css';
 import {ipcRenderer} from 'electron';
 import React, {useEffect} from 'react';
 import {useGlobalStore} from './utils/store';
-import {Container, Content} from 'rsuite';
-import {
-  RenderAbout,
-  RenderNavbar,
-  RenderSidebar,
-  NetworkDetection,
-} from './components';
+import Container from 'rsuite/Container';
+import Content from 'rsuite/Content';
+import CustomProvider from 'rsuite/CustomProvider';
+import RenderAbout from './components/RenderAbout';
+import RenderNavbar from './components/RenderNavbar';
+import RenderSidebar from './components/RenderSidebar';
+import NetworkDetection from './components/NetworkDetection';
+import PacmanLockDetection from './components/PacmanLockDetection';
+import InvalidConfigDetection from './components/InvalidConfigDetection';
+import updater from './utils/updater';
+import modules from './utils/modules';
 
 /**
  * @function App
@@ -24,28 +28,55 @@ export default function App() {
     ipcRenderer.send('StateChange', state.activeTasks);
   }, [state.activeTasks]);
   useEffect(() => {
+    window.ondragstart = () => false;
     ipcRenderer.send('Loaded');
     ipcRenderer.send('debug', 'Index page loaded');
+    ipcRenderer.once('update', () => {
+      updater()
+        .then(status => {
+          ipcRenderer.send(
+            'log',
+            status
+              ? `Modules updated to v${modules.get('version')}`
+              : 'Modules are upto date!',
+            'INFO',
+            'RebornOS Fire Renderer'
+          );
+        })
+        .catch(e => {
+          ipcRenderer.send(
+            'log',
+            `Error while looking for updates: ${e.message}`
+          );
+          ipcRenderer.send('debug', e);
+        });
+    });
   }, []);
   return (
-    <Container>
-      <NetworkDetection />
+    <CustomProvider theme={'dark'}>
       <Container>
-        <RenderSidebar />
         <Container>
+          <InvalidConfigDetection />
+          <PacmanLockDetection />
+          <NetworkDetection />
           <RenderNavbar />
-          <Content>{state.content}</Content>
-          {state.terminal && (
-            <div
-              id="terminal"
-              style={{
-                paddingTop: 20,
-              }}
-            />
-          )}
+          <Container>
+            <RenderSidebar />
+            <Content>
+              {state.content}
+              {state.terminal && (
+                <div
+                  id="terminal"
+                  style={{
+                    paddingTop: 20,
+                  }}
+                />
+              )}
+            </Content>
+          </Container>
         </Container>
+        <RenderAbout />
       </Container>
-      <RenderAbout />
-    </Container>
+    </CustomProvider>
   );
 }

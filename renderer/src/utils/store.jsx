@@ -1,6 +1,6 @@
 import {ipcRenderer} from 'electron';
 import React, {createContext, useReducer, Fragment, useContext} from 'react';
-import {RenderDashboard} from '../components/RenderDashboard';
+import RenderDashboard from '../components/RenderDashboard';
 
 const initialState = {
   showAboutModal: false,
@@ -10,7 +10,8 @@ const initialState = {
   packageName: '',
   packageDeps: [],
   terminal: true,
-  activeTaskType: 'install',
+  activeTaskType: 'installing',
+  theme: 'dark',
 };
 
 export const reducer = (state, action) => {
@@ -19,62 +20,62 @@ export const reducer = (state, action) => {
     `State: ${JSON.stringify(state)}, Action: ${JSON.stringify(action)}`
   );
   switch (action.type) {
-    case 'AboutModal':
+    case 'AboutModal': {
       return {
         ...state,
         showAboutModal: !state.showAboutModal,
       };
-    case 'ScanPackages':
+    }
+    case 'ScanPackages': {
       return {
         ...state,
         scanPackages: !state.scanPackages,
       };
-    case 'ContentUpdate':
+    }
+    case 'ContentUpdate': {
       return {
         ...state,
         content: action.newContent,
         terminal: action.terminal,
       };
-    case 'InstallationUpdate':
+    }
+    case 'InstallationUpdate': {
       return {
         ...state,
         activeTasks: action.status,
         packageName: action.name,
         origin: action.origin,
-        packageDeps: [
-          ...['pacman', '-Sv', '--noconfirm', '--needed'],
-          ...action.deps,
-        ],
+        packageDeps: [...['pacman', '-Sv', '--needed'], ...action.deps],
+        content: action.goto,
+        terminal: action.terminal,
+        activeTaskType: action.status ? 'installing' : state.activeTaskType,
+      };
+    }
+    case 'VersionInstallationUpdate': {
+      return {
+        ...state,
+        activeTasks: action.status,
+        packageName: action.name,
+        origin: action.origin,
+        packageDeps: [...['pacman', '-Uv', '--needed'], ...action.deps],
         content: action.goto,
         terminal: action.terminal,
         activeTaskType: 'installing',
       };
-    case 'VersionInstallationUpdate':
+    }
+    case 'UnInstallationUpdate': {
       return {
         ...state,
         activeTasks: action.status,
         packageName: action.name,
         origin: action.origin,
-        packageDeps: [
-          ...['pacman', '-Uv', '--noconfirm', '--needed'],
-          ...action.deps,
-        ],
-        content: action.goto,
-        terminal: action.terminal,
-        activeTaskType: 'installing',
-      };
-    case 'UnInstallationUpdate':
-      return {
-        ...state,
-        activeTasks: action.status,
-        packageName: action.name,
-        origin: action.origin,
-        packageDeps: [...['pacman', '-Rv', '--noconfirm'], ...action.deps],
+        packageDeps: [...['pacman', '-Rv'], ...action.deps],
         content: action.goto,
         terminal: action.terminal,
         activeTaskType: 'un-installing',
       };
-    case 'EnableUpdate':
+    }
+    case 'EnableUpdate': {
       return {
         ...state,
         activeTasks: action.status,
@@ -85,8 +86,10 @@ export const reducer = (state, action) => {
         terminal: action.terminal,
         activeTaskType: 'enabling',
       };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };
 

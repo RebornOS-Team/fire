@@ -1,19 +1,20 @@
-import {
-  Panel,
-  FlexboxGrid,
-  Divider,
-  Alert,
-  Toggle,
-  Icon,
-  InputNumber,
-  InputGroup,
-  Navbar,
-  Nav,
-} from 'rsuite';
-import React, {createRef, useCallback, useEffect, useState} from 'react';
+/* Not affected by this as all accessor variables are strings */
+/* eslint-disable security/detect-object-injection */
+import Panel from 'rsuite/Panel';
+import FlexboxGrid from 'rsuite/FlexboxGrid';
+import Divider from 'rsuite/Divider';
+import toaster from 'rsuite/toaster';
+import Message from 'rsuite/Message';
+import Toggle from 'rsuite/Toggle';
+import InputNumber from 'rsuite/InputNumber';
+import InputGroup from 'rsuite/InputGroup';
+import LegacyCheckIcon from '@rsuite/icons/legacy/Check';
+import LegacyCloseIcon from '@rsuite/icons/legacy/Close';
+import React, {useCallback, useEffect, useState, useMemo} from 'react';
 import {ipcRenderer} from 'electron';
 import {access, readFile, writeFile} from 'fs/promises';
 import {cpus} from 'os';
+import ReloadBar from './ReloadBar';
 
 /**
  * @function RenderTweaks
@@ -23,15 +24,21 @@ import {cpus} from 'os';
  * @description Used for rendering System Management
  * @returns {import('react').JSXElementConstructor} React Body
  */
-export function RenderTweaks() {
-  const inputRef = createRef();
+export default function RenderTweaks() {
+  const pacmanRegex = useMemo(
+    () => /^(?!#.*$)([ \t])*ParallelDownloads\s*=\s*\d*/gm,
+    []
+  );
+  const makepkgRegex = useMemo(
+    () => /^(?!#.*$)([ \t])*MAKEFLAGS\s*=\s*".+?"/gm,
+    []
+  );
+  const [downloads, setDownloads] = useState(5);
   const [conf, setConf] = useState({
-    'pacman.conf': {
-      regex: /^(?!#.*$)( |\t)*ParallelDownloads\s*=\s*[0-9]{1,}/gm,
+    pacman: {
       enabled: false,
     },
-    'makepkg.conf': {
-      regex: /^(?!#.*$)( |\t)*MAKEFLAGS\s*=\s*".+?"/gm,
+    makepkg: {
       enabled: false,
     },
   });
@@ -45,75 +52,114 @@ export function RenderTweaks() {
      * @async
      * @copyright SoulHarsh007 2021
      * @since v1.0.0-rc-003
-     * @param {'pacman.conf' | 'makepkg.conf'} file - file name we are working on
+     * @param {'pacman' | 'makepkg'} file - file name we are working on
      * @param {string} value - new value to set in file
+     * @param {RegExp} regex - RegExp to use for matching file content
      * @returns {Promise<void>}
      */
-    async (file, value) => {
+    async (file, value, regex) => {
       try {
-        await access(`/etc/${file}`);
+        await access(`/etc/${file}.conf`);
       } catch (error) {
-        Alert.error(`Cannot access: /etc/${file}`);
+        toaster.push(
+          <Message
+            type="error"
+            showIcon
+            closable
+          >{`Cannot access: /etc/${file}.conf`}</Message>
+        );
         ipcRenderer.send('debug', error);
       }
       try {
-        const data = await readFile(`/etc/${file}`, {
+        const data = await readFile(`/etc/${file}.conf`, {
           encoding: 'utf8',
         });
-        const hasFlags = data.match(conf[`${file}`].regex)?.map(x => x.trim());
+        const hasFlags = data.match(regex);
+        writeFile(`/tmp/${file}.conf.bak`, data).then(() =>
+          toaster.push(
+            <Message
+              type="info"
+              showIcon
+              closable
+            >{`Configuration backed up at /tmp/${file}.conf.bak`}</Message>
+          )
+        );
         if (hasFlags) {
-          writeFile(`/tmp/${file}.bak`, data).then(() =>
-            Alert.info(`Configuration backed up at /tmp/${file}.bak`)
-          );
           writeFile(
-            `/tmp/${file}`,
-            `${data.replace(
-              conf[`${file}`].regex,
-              ''
-            )}\n\n# Patched by RebornOS Fire v${
+            `/tmp/${file}.conf`,
+            `${data.replace(regex, '')}\n\n# Patched by RebornOS Fire v${
               process.env.VERSION
             } #\n# Old value: ${hasFlags}\n${value}\n`
           );
         } else {
-          writeFile(
-            `/tmp/${file}`,
-            `${data.replace(
-              conf[`${file}`].regex,
-              ''
-            )}\n\n# Patched by RebornOS Fire v${
-              process.env.VERSION
-            } #\n${value}\n`
-          );
+          if (file === 'pacman') {
+            writeFile(
+              `/tmp/${file}.conf`,
+              `${data.replace(
+                regex,
+                `[options]\n${value}`
+              )}\n\n# Patched by RebornOS Fire v${
+                process.env.VERSION
+              } #\n# new value: ${value} #\n`
+            );
+          } else {
+            writeFile(
+              `/tmp/${file}.conf`,
+              `${data}\n${value}\n\n# Patched by RebornOS Fire v${process.env.VERSION} #\n# new value: ${value} #\n`
+            );
+          }
         }
       } catch (error) {
-        Alert.error('Cannot read: /etc/makepkg.conf!');
+        toaster.push(
+          <Message
+            type="error"
+            showIcon
+            closable
+          >{`Cannot read: /etc/${file}.conf!`}</Message>
+        );
         return ipcRenderer.send('debug', error);
       }
-      ipcRenderer.send(
-        'termExec',
-        ['cp', `/tmp/${file}`, `/tmp/${file}.bak`, '/etc'],
-        'System Tweaks'
-      );
-      ipcRenderer.once('termExit', (_event, data) => {
+      ipcRenderer.once('termExit', (_, data) => {
         if (data.signal || data.exitCode) {
-          Alert.error('Failed to update configuration!');
+          toaster.push(
+            <Message type="error" showIcon closable>
+              Failed to update configuration!
+            </Message>
+          );
         } else {
-          Alert.success('Configuration updated successfully!');
+          toaster.push(
+            <Message type="success" showIcon closable>
+              Configuration updated successfully!
+            </Message>
+          );
         }
         setRefresh({
           loading: true,
           text: 'Reloading',
         });
         ipcRenderer.send('generateLogs');
-        ipcRenderer.once('logsGenerated', (_event, data) => {
-          Alert.info(`Logs generated, File can be found at: ${data}`);
+        ipcRenderer.once('logsGenerated', (_e, logs) => {
+          toaster.push(
+            <Message
+              type="info"
+              showIcon
+              closable
+            >{`Logs generated, File can be found at: ${logs}`}</Message>
+          );
         });
       });
+      ipcRenderer.send(
+        'termExec',
+        ['cp', `/tmp/${file}.conf`, `/tmp/${file}.conf.bak`, '/etc'],
+        'System Tweaks'
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   useEffect(() => {
+    if (!refresh.loading) {
+      return;
+    }
     try {
       readFile(`/etc/pacman.conf`, {
         encoding: 'utf8',
@@ -121,14 +167,15 @@ export function RenderTweaks() {
         readFile('/etc/makepkg.conf', {
           encoding: 'utf8',
         }).then(makepkg => {
+          setDownloads(
+            parseInt(pacman.match(pacmanRegex)?.[0].match(/\d+/)?.[0], 10) || 5
+          );
           setConf({
-            'pacman.conf': {
-              regex: /^(?!#.*$)( |\t)*ParallelDownloads\s*=\s*[0-9]{1,}/gm,
-              enabled: !!pacman.match(conf['pacman.conf'].regex),
+            pacman: {
+              enabled: !!pacman.match(pacmanRegex),
             },
-            'makepkg.conf': {
-              regex: /^(?!#.*$)( |\t)*MAKEFLAGS\s*=\s*".+?"/gm,
-              enabled: !!makepkg.match(conf['makepkg.conf'].regex),
+            makepkg: {
+              enabled: !!makepkg.match(makepkgRegex),
             },
           });
         });
@@ -140,11 +187,7 @@ export function RenderTweaks() {
       loading: false,
       text: 'Reload',
     });
-    Alert.config({
-      duration: 8000,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh.loading === true]);
+  }, [makepkgRegex, pacmanRegex, refresh]);
   return (
     <div>
       <Panel
@@ -154,30 +197,21 @@ export function RenderTweaks() {
         header={<h3>System Tweaks</h3>}
         bodyFill
       />
-      <Navbar appearance="subtle">
-        <Navbar.Body>
-          <Nav pullRight appearance="subtle" activeKey="1">
-            <Nav.Item
-              icon={<Icon icon="refresh" pulse={refresh.loading} />}
-              eventKey="1"
-              onClick={() =>
-                setRefresh(x => {
-                  if (!x.loading) {
-                    return {
-                      loading: true,
-                      text: 'Reloading',
-                    };
-                  }
-                  return x;
-                })
-              }
-            >
-              {refresh.text}
-            </Nav.Item>
-          </Nav>
-        </Navbar.Body>
-      </Navbar>
-      <Divider />
+      <ReloadBar
+        action={() =>
+          setRefresh(x => {
+            if (!x.loading) {
+              return {
+                loading: true,
+                text: 'Reloading',
+              };
+            }
+            return x;
+          })
+        }
+        pulseState={refresh.loading}
+        text={refresh.text}
+      />
       <FlexboxGrid
         justify="space-between"
         style={{
@@ -190,19 +224,21 @@ export function RenderTweaks() {
         </FlexboxGrid.Item>
         <FlexboxGrid.Item>
           <Toggle
-            checkedChildren={<Icon icon="check" />}
-            unCheckedChildren={<Icon icon="close" />}
-            checked={conf['makepkg.conf'].enabled}
-            onChange={async checked => {
+            checkedChildren={<LegacyCheckIcon />}
+            unCheckedChildren={<LegacyCloseIcon />}
+            checked={conf.makepkg.enabled}
+            onChange={checked => {
               if (checked) {
-                return await handleToggle(
-                  'makepkg.conf',
-                  `MAKEFLAGS="${cpus().length / 2}"`
+                return handleToggle(
+                  'makepkg',
+                  `MAKEFLAGS="-j${cpus().length / 2}"`,
+                  makepkgRegex
                 );
               }
-              return await handleToggle(
-                'makepkg.conf',
-                `# MAKEFLAGS="${cpus().length / 2}"`
+              return handleToggle(
+                'makepkg',
+                `# MAKEFLAGS="-j${cpus().length / 2}"`,
+                makepkgRegex
               );
             }}
           />
@@ -220,17 +256,34 @@ export function RenderTweaks() {
           <h4>
             Pacman parallel downloads
             <InputGroup style={{width: 160}}>
-              <InputGroup.Button onClick={() => inputRef.current.handleMinus()}>
+              <InputGroup.Button
+                onClick={() =>
+                  setDownloads(x => {
+                    if (x === 1) {
+                      return 1;
+                    }
+                    return x - 1;
+                  })
+                }
+                disabled={downloads === 1}
+              >
                 -
               </InputGroup.Button>
               <InputNumber
-                defaultValue={5}
-                max={20}
-                min={1}
-                ref={inputRef}
+                value={downloads}
                 className={'custom-input-number'}
               />
-              <InputGroup.Button onClick={() => inputRef.current.handlePlus()}>
+              <InputGroup.Button
+                onClick={() =>
+                  setDownloads(x => {
+                    if (x === 20) {
+                      return 20;
+                    }
+                    return x + 1;
+                  })
+                }
+                disabled={downloads === 20}
+              >
                 +
               </InputGroup.Button>
             </InputGroup>
@@ -238,19 +291,21 @@ export function RenderTweaks() {
         </FlexboxGrid.Item>
         <FlexboxGrid.Item>
           <Toggle
-            checkedChildren={<Icon icon="check" />}
-            unCheckedChildren={<Icon icon="close" />}
-            checked={conf['pacman.conf'].enabled}
-            onChange={async checked => {
+            checkedChildren={<LegacyCheckIcon />}
+            unCheckedChildren={<LegacyCloseIcon />}
+            checked={conf.pacman.enabled}
+            onChange={checked => {
               if (checked) {
-                return await handleToggle(
-                  'pacman.conf',
-                  `ParallelDownloads = ${inputRef.current.state.value}`
+                return handleToggle(
+                  'pacman',
+                  `ParallelDownloads = ${parseInt(downloads, 10) || 1}`,
+                  pacmanRegex
                 );
               }
-              return await handleToggle(
-                'pacman.conf',
-                '# ParallelDownloads = 5'
+              return handleToggle(
+                'pacman',
+                '# ParallelDownloads = 5',
+                pacmanRegex
               );
             }}
           />

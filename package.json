@@ -2,7 +2,7 @@
   "name": "rebornos-fire",
   "description": "RebornOS Fire",
   "private": true,
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "codeName": "Shiny Cat Bush",
   "packageManager": "yarn@3.0.0",
   "author": {
@@ -19,9 +19,10 @@
   "scripts": {
     "dev": "node ./electron-dev.js",
     "build:dist": "yarn build:release && yarn build:package",
-    "build:release": "yarn build:all && electron-builder build --linux",
+    "build:release": "yarn build:env && electron-builder build --linux",
     "build:main": "NODE_ENV=production webpack",
     "build:renderer": "cd renderer && yarn build",
+    "build:env": "node ./buildAll.js",
     "build:all": "yarn build:renderer && yarn build:main",
     "build:package": "./builder.sh && yarn build:make",
     "build:make": "makepkg -Ciscf --config ./makepkg.conf",
@@ -39,23 +40,28 @@
     "@nia3208/centra": "1.0.9-1",
     "bs58": "4.0.1",
     "electron-serve": "1.1.0",
-    "node-pty": "0.10.1"
+    "electron-store": "8.0.1",
+    "electron-unhandled": "3.0.2",
+    "jose": "4.2.1",
+    "node-pty": "0.10.1",
+    "validator": "13.7.0",
+    "yaml": "1.10.2"
   },
   "devDependencies": {
     "@types/bs58": "4.0.1",
-    "electron": "14.0.0",
-    "electron-builder": "22.11.7",
-    "eslint": "7.32.0",
+    "electron": "15.3.1",
+    "electron-builder": "22.13.1",
+    "eslint": "8.2.0",
     "eslint-config-google": "0.14.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-plugin-jsdoc": "36.1.0",
+    "eslint-plugin-jsdoc": "37.0.3",
     "eslint-plugin-prettier": "4.0.0",
     "eslint-plugin-security": "1.4.0",
-    "node-gyp": "8.2.0",
+    "node-gyp": "8.4.0",
     "node-loader": "2.0.0",
-    "prettier": "2.4.0",
-    "webpack": "5.52.1",
-    "webpack-cli": "4.8.0"
+    "prettier": "2.4.1",
+    "webpack": "5.62.2",
+    "webpack-cli": "4.9.1"
   },
   "build": {
     "appId": "org.rebornos.fire",

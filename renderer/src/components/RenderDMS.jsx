@@ -1,21 +1,20 @@
-import {
-  Nav,
-  Icon,
-  Modal,
-  FlexboxGrid,
-  Button,
-  Navbar,
-  Panel,
-  Col,
-  Divider,
-  ButtonGroup,
-  PanelGroup,
-} from 'rsuite';
+import Modal from 'rsuite/Modal';
+import FlexboxGrid from 'rsuite/FlexboxGrid';
+import Button from 'rsuite/Button';
+import Panel from 'rsuite/Panel';
+import Col from 'rsuite/Col';
+import Divider from 'rsuite/Divider';
+import ButtonGroup from 'rsuite/ButtonGroup';
+import PanelGroup from 'rsuite/PanelGroup';
+import LegacyWarningIcon from '@rsuite/icons/legacy/Warning';
 import React, {useState, useEffect} from 'react';
-import {execSync} from 'child_process';
+import {execFileSync} from 'child_process';
 import {useGlobalStore} from '../utils/store';
-import {RenderInstallation} from './RenderInstallation';
-import {readlinkSync, existsSync} from 'fs';
+import ReloadBar from './ReloadBar';
+import RenderInstallation from './RenderInstallation';
+import modules from '../utils/modules';
+import {readlinkSync} from 'fs';
+import {ipcRenderer} from 'electron';
 
 /**
  * @function RenderDMS
@@ -25,7 +24,7 @@ import {readlinkSync, existsSync} from 'fs';
  * @description Used for rendering Display Managers
  * @returns {import('react').JSXElementConstructor} - React Body
  */
-export function RenderDMS() {
+export default function RenderDMS() {
   const {dispatch} = useGlobalStore();
   const [currentDM, setCurrentDM] = useState('TTY');
   const [scanPackages, setScanPackages] = useState(true);
@@ -48,66 +47,42 @@ export function RenderDMS() {
     loading: true,
     text: 'Reloading',
   });
-  const [packages, setPackages] = useState([
-    {
-      name: 'LightDM',
-      description: 'A lightweight display manager',
-      image: '/lightdm.webp',
-      installed: false,
-      package: /(lightdm)(-(devel|git))?/g,
-      deps: ['lightdm', 'lightdm-gtk-greeter'],
-      enabled: false,
-    },
-    {
-      name: 'SDDM',
-      description: 'QML based X11 and Wayland display manager',
-      image: '/sddm.webp',
-      installed: false,
-      package: /(sddm)(-wayland)?(-git)?/g,
-      deps: ['sddm'],
-      enabled: false,
-    },
-    {
-      name: 'GDM',
-      description: 'GNOME Display manager and login screen',
-      image: '/gdm.webp',
-      installed: false,
-      package: /(gdm)(-git)?/g,
-      deps: ['gdm'],
-      enabled: false,
-    },
-    {
-      name: 'LXDM',
-      description: 'Lightweight X11 Display Manager',
-      image: '/lxdm.webp',
-      installed: false,
-      package: /(lxdm)(-(git|gtk3))?/g,
-      deps: ['lxdm-gtk3'],
-      enabled: false,
-    },
-  ]);
+  const [packages, setPackages] = useState(
+    modules.get('dms').map(x => {
+      /* disabled as config defaults have strings and config cannot be updated
+       * by users manually (causes encryption removal and regenerates the config.
+       * encryption key is different for every build and it is not accessible by the user)
+       */
+      // eslint-disable-next-line security/detect-non-literal-regexp
+      x.package = new RegExp(x.package.source, x.package.flags);
+      return x;
+    })
+  );
   useEffect(() => {
-    const scanned = execSync('pacman -Qq').toString();
-    const enabled = existsSync('/etc/systemd/system/display-manager.service')
-      ? readlinkSync('/etc/systemd/system/display-manager.service')
-          ?.match(/[a-z]*\.service/g)?.[0]
-          ?.split('.')?.[0]
-          ?.toLowerCase()
-      : 'TTY';
+    const scanned = execFileSync('pacman', ['-Qq']).toString();
+    let enabled = 'TTY';
+    try {
+      enabled = readlinkSync('/etc/systemd/system/display-manager.service')
+        ?.match(/[a-z]*\.service/g)?.[0]
+        ?.split('.')?.[0]
+        ?.toLowerCase();
+    } catch (e) {
+      ipcRenderer.send('debug', e);
+    }
     setCurrentDM(enabled);
     setPackages(x =>
       x.map(y =>
         scanned.match(y.package)?.length
           ? {
-              name: y.name,
-              description: y.description,
-              image: y.image,
+              ...y,
               installed: true,
-              package: y.package,
-              deps: y.deps,
               enabled: enabled === y.name.toLowerCase(),
             }
-          : y
+          : {
+              ...y,
+              enabled: enabled === y.name.toLowerCase(),
+              installed: false,
+            }
       )
     );
     setRefresh({
@@ -124,31 +99,22 @@ export function RenderDMS() {
         header={<h3>Display Managers</h3>}
         bodyFill
       />
-      <Navbar appearance="subtle">
-        <Navbar.Body>
-          <Nav pullRight appearance="subtle" activeKey="1">
-            <Nav.Item
-              icon={<Icon icon="refresh" pulse={refresh.loading} />}
-              eventKey="1"
-              onClick={() =>
-                setRefresh(x => {
-                  if (!x.loading) {
-                    setScanPackages(y => !y);
-                    return {
-                      loading: true,
-                      text: 'Reloading',
-                    };
-                  }
-                  return x;
-                })
-              }
-            >
-              {refresh.text}
-            </Nav.Item>
-          </Nav>
-        </Navbar.Body>
-      </Navbar>
-      <Divider />
+      <ReloadBar
+        action={() =>
+          setRefresh(x => {
+            if (!x.loading) {
+              setScanPackages(y => !y);
+              return {
+                loading: true,
+                text: 'Reloading',
+              };
+            }
+            return x;
+          })
+        }
+        pulseState={refresh.loading}
+        text={refresh.text}
+      />
       <PanelGroup>
         <FlexboxGrid
           justify="space-around"
@@ -158,7 +124,7 @@ export function RenderDMS() {
         >
           {packages.map((x, i) => (
             <FlexboxGrid.Item
-              componentClass={Col}
+              as={Col}
               colspan={28}
               md={6}
               key={i}
@@ -240,8 +206,8 @@ export function RenderDMS() {
       </PanelGroup>
       <Modal
         size="xs"
-        show={showConfirmation}
-        onHide={() => setShowConfirmation(false)}
+        open={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
         backdrop="static"
         keyboard={false}
         style={{
@@ -268,11 +234,10 @@ export function RenderDMS() {
                       origin: <RenderDMS />,
                       terminal: true,
                     });
-                    new Notification('Installation Started!', {
+                    return new Notification('Installation Started!', {
                       icon: '/icon.png',
                       body: `Installation started for: ${pkg.name}`,
                     });
-                    break;
                   case 'uninstall':
                     if (
                       packages.filter(x => x.installed).length === 1 &&
@@ -281,7 +246,7 @@ export function RenderDMS() {
                       return setShowLastConfirmation({
                         title: (
                           <>
-                            <Icon icon="warning" /> Warning: Last DM Detected
+                            <LegacyWarningIcon /> Warning: Last DM Detected
                           </>
                         ),
                         body: `If you un-install ${pkg.name}, you will be left with no desktop manager! Are you sure you want to do this?`,
@@ -292,7 +257,7 @@ export function RenderDMS() {
                           type: 'UnInstallationUpdate',
                           status: true,
                           name: pkg.name,
-                          deps: pkg.deps,
+                          deps: [pkg.deps[0]],
                           goto: <RenderInstallation />,
                           origin: <RenderDMS />,
                           terminal: true,
@@ -303,23 +268,21 @@ export function RenderDMS() {
                       type: 'UnInstallationUpdate',
                       status: true,
                       name: pkg.name,
-                      deps: pkg.deps,
+                      deps: [pkg.deps[0]],
                       goto: <RenderInstallation />,
                       origin: <RenderDMS />,
                       terminal: true,
                     });
-                    new Notification('Un-Installation Started!', {
+                    return new Notification('Un-Installation Started!', {
                       icon: '/icon.png',
                       body: `Un-Installation started for: ${pkg.name}`,
                     });
-                    break;
                   case 'enable':
                     if (currentDM !== 'TTY') {
                       return setShowLastConfirmation({
                         title: (
                           <>
-                            <Icon icon="warning" /> Warning: DM Conflict
-                            Detected
+                            <LegacyWarningIcon /> Warning: DM Conflict Detected
                           </>
                         ),
                         body: `If you enable ${
@@ -358,16 +321,15 @@ export function RenderDMS() {
                       origin: <RenderDMS />,
                       terminal: true,
                     });
-                    new Notification(`Enabling ${pkg.name}`, {
+                    return new Notification(`Enabling ${pkg.name}`, {
                       icon: '/icon.png',
                       body: `Enabling ${pkg.name}`,
                     });
-                    break;
                   case 'disable':
-                    setShowLastConfirmation({
+                    return setShowLastConfirmation({
                       title: (
                         <>
-                          <Icon icon="warning" /> Warning: No DM Access
+                          <LegacyWarningIcon /> Warning: No DM Access
                         </>
                       ),
                       body: `If you disable ${pkg.name}, You will not have any DM enabled! Are you sure you want to do this?`,
@@ -388,7 +350,6 @@ export function RenderDMS() {
                         terminal: true,
                       },
                     });
-                    break;
                   default:
                     break;
                 }
@@ -408,8 +369,8 @@ export function RenderDMS() {
       </Modal>
       <Modal
         size="xs"
-        show={showLastConfirmation.show}
-        onHide={() => setShowLastConfirmation({})}
+        open={showLastConfirmation.show}
+        onClose={() => setShowLastConfirmation({})}
         backdrop="static"
         keyboard={false}
         style={{
@@ -425,11 +386,14 @@ export function RenderDMS() {
             <Button
               onClick={() => {
                 dispatch(showLastConfirmation.dispatchData);
-                new Notification(showLastConfirmation.notificationTitle, {
-                  icon: '/icon.png',
-                  body: showLastConfirmation.notificationBody,
-                });
                 setShowLastConfirmation({});
+                return new Notification(
+                  showLastConfirmation.notificationTitle,
+                  {
+                    icon: '/icon.png',
+                    body: showLastConfirmation.notificationBody,
+                  }
+                );
               }}
               appearance="primary"
             >
@@ -446,12 +410,12 @@ export function RenderDMS() {
       </Modal>
       <Modal
         overflow={false}
-        full={true}
-        show={img.show}
+        full
+        open={img.show}
         style={{
           textAlign: 'center',
         }}
-        onHide={() =>
+        onClose={() =>
           setImg(x => ({
             show: false,
             url: x.url,
